@@ -1,0 +1,23 @@
+{
+  "task": "T2.1.0",
+  "task_name": "old_result_audit",
+  "timestamp": "2026-05-10T10:00:00",
+  "status": "completed",
+  "invalidated_metrics": [
+    "mutual_ratio",
+    "reverse_score",
+    "nodes_with_market_data",
+    "size_liquidity_buckets"
+  ],
+  "historical_views": [
+    "application_scenarios_json"
+  ],
+  "required_recomputes": [
+    "all_graph_layers",
+    "all_baselines",
+    "hub_bridge_analysis",
+    "market_behavior_analysis"
+  ],
+  "h5_status": "REJECTED_STATIC_PROXY",
+  "audit_report_path": "outputs/reports/phase2_1/PHASE2_OLD_RESULTS_AUDIT.md"
+}

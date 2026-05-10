@@ -1,0 +1,21 @@
+{
+  "view_name": "theme_text",
+  "view_key": "07a2d5b269d2",
+  "n_nodes": 5502,
+  "k": 100,
+  "n_edges": 550200,
+  "mutual_directed_rows": 271884,
+  "mutual_pairs_unique": 135942,
+  "reciprocity_ratio": 0.49415485278080695,
+  "reverse_score_nonnull_ratio": 1.0,
+  "near_duplicate_edges_count": 870,
+  "rank_band_counts": {
+    "rank_051_100": 275100,
+    "rank_021_050": 165060,
+    "rank_011_020": 55020,
+    "rank_001_005": 27510,
+    "rank_006_010": 27510
+  },
+  "status": "success",
+  "timestamp": "2026-05-10T12:11:21"
+}

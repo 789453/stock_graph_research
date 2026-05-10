@@ -1,0 +1,31 @@
+{
+  "phase": "phase2_1",
+  "task_id": "T2.1.1",
+  "task_name": "multi_view_semantic_audit",
+  "view_name": "theme_text",
+  "view_key": "07a2d5b269d2",
+  "status": "success",
+  "started_at": "2026-05-10T11:57:13",
+  "finished_at": "2026-05-10T11:57:15",
+  "elapsed_seconds": 2.316819429397583,
+  "inputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/theme_text/theme_text-all.npy",
+    "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/theme_text/theme_text-all.meta.json",
+    "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/parquet/records-all.parquet"
+  ],
+  "outputs": [
+    "cache/semantic_graph/views/theme_text/07a2d5b269d2/audit/semantic_audit.json",
+    "cache/semantic_graph/views/theme_text/07a2d5b269d2/audit/alignment_diagnostics.json",
+    "cache/semantic_graph/views/theme_text/07a2d5b269d2/audit/near_duplicate_pairs.csv"
+  ],
+  "parameters": {
+    "near_duplicate_threshold": 0.999999
+  },
+  "row_counts": {
+    "vectors": 5502,
+    "near_duplicates": 0
+  },
+  "warnings": [],
+  "error": null,
+  "safe_to_continue": true
+}

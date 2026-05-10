@@ -1,0 +1,21 @@
+{
+  "phase": "phase2_1",
+  "task_id": "T2.1.6",
+  "task_name": "domain_and_matched_random_baselines",
+  "view_name": "chain_text",
+  "view_key": "58563ca7113f",
+  "status": "success",
+  "started_at": "2026-05-10T12:15:26",
+  "finished_at": "2026-05-10T12:17:06",
+  "elapsed_seconds": 99.49685549736023,
+  "inputs": [
+    "cache/semantic_graph/views/chain_text/58563ca7113f/edge_layers/edge_candidates_k100.parquet"
+  ],
+  "outputs": [
+    "cache/semantic_graph/views/chain_text/58563ca7113f/baselines/domain_baseline_comparison.parquet",
+    "cache/semantic_graph/views/chain_text/58563ca7113f/baselines/industry_comparison.json"
+  ],
+  "row_counts": {
+    "bands": 5
+  }
+}

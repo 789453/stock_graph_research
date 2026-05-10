@@ -1,0 +1,13 @@
+{
+  "rows": 5502,
+  "dim": 1024,
+  "dtype": "float32",
+  "non_finite_count": 0,
+  "zero_norm_count": 0,
+  "l2_min": 0.9999998211860657,
+  "l2_mean": 1.0,
+  "l2_max": 1.000000238418579,
+  "row_id_unique_count": 5502,
+  "alignment_ok": true,
+  "view": "theme_text"
+}

@@ -1,0 +1,13 @@
+{
+  "matched_market_nodes": 5502,
+  "unmatched_nodes": 0,
+  "min_required_matched_nodes": 5400,
+  "status": "success",
+  "fields": [
+    "median_total_mv",
+    "median_circ_mv",
+    "median_turnover_rate",
+    "median_amount"
+  ],
+  "timestamp": "2026-05-10T12:11:57"
+}

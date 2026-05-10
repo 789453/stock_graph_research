@@ -1,0 +1,39 @@
+{
+  "phase": "phase2_1",
+  "task_id": "T2.1.2",
+  "task_name": "multi_view_k100_graph",
+  "view_name": "chain_text",
+  "view_key": "58563ca7113f",
+  "status": "success",
+  "started_at": "2026-05-10T11:57:59",
+  "finished_at": "2026-05-10T11:58:01",
+  "elapsed_seconds": 1.5432748794555664,
+  "inputs": [
+    "cache/semantic_graph/views/chain_text/58563ca7113f/audit/semantic_audit.json"
+  ],
+  "outputs": [
+    "cache/semantic_graph/views/chain_text/58563ca7113f/graph/neighbors_k100.npz",
+    "cache/semantic_graph/views/chain_text/58563ca7113f/edge_layers/edge_candidates_k100.parquet",
+    "cache/semantic_graph/views/chain_text/58563ca7113f/graph/edges_mutual_directed_rows_k100.parquet"
+  ],
+  "parameters": {
+    "k": 100,
+    "faiss_gpu": 0
+  },
+  "row_counts": {
+    "n_nodes": 5502,
+    "k": 100,
+    "n_directed_edges": 550200,
+    "n_mutual_directed_rows": 317194,
+    "n_mutual_pairs_unique": 158597,
+    "reciprocity_ratio": 0.5765067248273356,
+    "score_q50": 0.7084323167800903,
+    "score_q90": 0.7854526162147522,
+    "score_q99": 0.8664682048559189,
+    "self_neighbor_count": 0,
+    "duplicate_stock_edge_count": 0
+  },
+  "warnings": [],
+  "error": null,
+  "safe_to_continue": true
+}

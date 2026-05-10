@@ -1,0 +1,23 @@
+{
+  "phase": "phase2_1",
+  "task_id": "T2.1.4",
+  "task_name": "multi_view_industry_baselines",
+  "view_name": "main_business_detail",
+  "view_key": "46bbc3c09f1c",
+  "status": "success",
+  "started_at": "2026-05-10T12:18:50",
+  "finished_at": "2026-05-10T12:18:51",
+  "elapsed_seconds": 0.7951419353485107,
+  "inputs": [
+    "cache/semantic_graph/views/main_business_detail/46bbc3c09f1c/edge_layers/edge_candidates_k100.parquet",
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet"
+  ],
+  "outputs": [
+    "cache/semantic_graph/views/main_business_detail/46bbc3c09f1c/baselines/industry_by_rank.csv",
+    "cache/semantic_graph/views/main_business_detail/46bbc3c09f1c/baselines/industry_topk_purity.csv"
+  ],
+  "row_counts": {
+    "edges": 550200,
+    "random_same_l3_prob": 0.006686233519480812
+  }
+}

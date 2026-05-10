@@ -1,0 +1,14 @@
+{
+  "row_ids_count": 5502,
+  "records_count": 5502,
+  "row_ids_unique_count": 5502,
+  "records_record_id_unique_count": 5502,
+  "stock_code_unique_count": 5502,
+  "row_order_binding_ok": true,
+  "missing_in_records_count": 0,
+  "extra_in_records_count": 0,
+  "duplicate_row_ids": [],
+  "duplicate_record_ids": [],
+  "duplicate_stock_codes": [],
+  "all_checks_passed": true
+}

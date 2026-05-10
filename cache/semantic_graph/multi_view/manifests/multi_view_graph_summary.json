@@ -1,0 +1,33 @@
+{
+  "phase": "phase2_1",
+  "task_id": "T2.1.2",
+  "task_name": "multi_view_graph_summary",
+  "status": "success",
+  "timestamp": "2026-05-10T12:11:23",
+  "view_summaries": [
+    {
+      "view_name": "main_business_detail",
+      "view_key": "46bbc3c09f1c",
+      "status": "success",
+      "reciprocity_ratio": 0.4931515812431843
+    },
+    {
+      "view_name": "theme_text",
+      "view_key": "07a2d5b269d2",
+      "status": "success",
+      "reciprocity_ratio": 0.49415485278080695
+    },
+    {
+      "view_name": "chain_text",
+      "view_key": "58563ca7113f",
+      "status": "success",
+      "reciprocity_ratio": 0.5765067248273356
+    },
+    {
+      "view_name": "full_text",
+      "view_key": "e7a0080f4bc8",
+      "status": "success",
+      "reciprocity_ratio": 0.5742021083242457
+    }
+  ]
+}

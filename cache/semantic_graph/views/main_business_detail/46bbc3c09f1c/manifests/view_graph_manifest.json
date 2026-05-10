@@ -1,0 +1,39 @@
+{
+  "phase": "phase2_1",
+  "task_id": "T2.1.2",
+  "task_name": "multi_view_k100_graph",
+  "view_name": "main_business_detail",
+  "view_key": "46bbc3c09f1c",
+  "status": "success",
+  "started_at": "2026-05-10T11:57:53",
+  "finished_at": "2026-05-10T11:57:58",
+  "elapsed_seconds": 4.904143571853638,
+  "inputs": [
+    "cache/semantic_graph/views/main_business_detail/46bbc3c09f1c/audit/semantic_audit.json"
+  ],
+  "outputs": [
+    "cache/semantic_graph/views/main_business_detail/46bbc3c09f1c/graph/neighbors_k100.npz",
+    "cache/semantic_graph/views/main_business_detail/46bbc3c09f1c/edge_layers/edge_candidates_k100.parquet",
+    "cache/semantic_graph/views/main_business_detail/46bbc3c09f1c/graph/edges_mutual_directed_rows_k100.parquet"
+  ],
+  "parameters": {
+    "k": 100,
+    "faiss_gpu": 0
+  },
+  "row_counts": {
+    "n_nodes": 5502,
+    "k": 100,
+    "n_directed_edges": 550200,
+    "n_mutual_directed_rows": 271332,
+    "n_mutual_pairs_unique": 135666,
+    "reciprocity_ratio": 0.4931515812431843,
+    "score_q50": 0.6576454937458038,
+    "score_q90": 0.744074821472168,
+    "score_q99": 0.8362715941667558,
+    "self_neighbor_count": 0,
+    "duplicate_stock_edge_count": 0
+  },
+  "warnings": [],
+  "error": null,
+  "safe_to_continue": true
+}

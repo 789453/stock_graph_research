@@ -75,23 +75,85 @@ def neighbors_to_directed_edges(neighbors: NeighborMatrix, node_table: pd.DataFr
 
     return pd.DataFrame(rows)
 
+def derive_mutual_edges_fast(
+    directed_edges: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    required = {"src_node_id", "dst_node_id", "rank", "score"}
+    missing = required - set(directed_edges.columns)
+    if missing:
+        raise ValueError(f"directed_edges missing columns: {missing}")
+
+    edges = directed_edges.copy()
+    edges["src_node_id"] = edges["src_node_id"].astype(np.int32)
+    edges["dst_node_id"] = edges["dst_node_id"].astype(np.int32)
+    edges["rank"] = edges["rank"].astype(np.int32)
+    edges["score"] = edges["score"].astype(np.float32)
+
+    duplicated = edges.duplicated(["src_node_id", "dst_node_id"])
+    if duplicated.any():
+        bad = edges.loc[duplicated, ["src_node_id", "dst_node_id"]].head(10).to_dict("records")
+        raise ValueError(f"duplicated directed edges found, examples={bad}")
+
+    self_edges = edges["src_node_id"].to_numpy() == edges["dst_node_id"].to_numpy()
+    if self_edges.any():
+        bad = edges.loc[self_edges, ["src_node_id", "dst_node_id", "rank", "score"]].head(10).to_dict("records")
+        raise ValueError(f"self edges found in directed_edges, examples={bad}")
+
+    reverse = edges[["src_node_id", "dst_node_id", "rank", "score"]].rename(columns={
+        "src_node_id": "dst_node_id",
+        "dst_node_id": "src_node_id",
+        "rank": "reverse_rank",
+        "score": "reverse_score",
+    })
+
+    merged = edges.merge(
+        reverse,
+        on=["src_node_id", "dst_node_id"],
+        how="left",
+        validate="one_to_one",
+    )
+
+    mutual_directed = merged[merged["reverse_rank"].notna()].copy()
+    mutual_directed["reverse_rank"] = mutual_directed["reverse_rank"].astype(np.int32)
+    mutual_directed["reverse_score"] = mutual_directed["reverse_score"].astype(np.float32)
+    mutual_directed["score_mean"] = (
+        mutual_directed["score"].astype(np.float32) +
+        mutual_directed["reverse_score"].astype(np.float32)
+    ) / 2.0
+
+    mutual_directed["u_node_id"] = np.minimum(
+        mutual_directed["src_node_id"].to_numpy(),
+        mutual_directed["dst_node_id"].to_numpy(),
+    )
+    mutual_directed["v_node_id"] = np.maximum(
+        mutual_directed["src_node_id"].to_numpy(),
+        mutual_directed["dst_node_id"].to_numpy(),
+    )
+
+    mutual_pairs = (
+        mutual_directed
+        .sort_values(["u_node_id", "v_node_id", "src_node_id"])
+        .drop_duplicates(["u_node_id", "v_node_id"])
+        .copy()
+    )
+
+    n_directed = len(edges)
+    n_mutual_directed = len(mutual_directed)
+    n_mutual_pairs = len(mutual_pairs)
+    reciprocity_ratio = n_mutual_directed / n_directed if n_directed else 0.0
+
+    if n_mutual_directed != 2 * n_mutual_pairs:
+        raise ValueError(
+            f"mutual directed rows should equal 2 * unique pairs; "
+            f"got {n_mutual_directed=} {n_mutual_pairs=}"
+        )
+
+    if not (0.0 <= reciprocity_ratio <= 1.0):
+        raise ValueError(f"invalid reciprocity_ratio={reciprocity_ratio}")
+
+    return mutual_directed, mutual_pairs
+
+
 def derive_mutual_edges(directed_edges: pd.DataFrame) -> pd.DataFrame:
-    edge_set = set(zip(directed_edges["src_node_id"], directed_edges["dst_node_id"]))
-
-    mutual_rows = []
-    for _, row in directed_edges.iterrows():
-        u, v = row["src_node_id"], row["dst_node_id"]
-        if (v, u) in edge_set:
-            rev_row = directed_edges[(directed_edges["src_node_id"] == v) & (directed_edges["dst_node_id"] == u)]
-            if len(rev_row) > 0:
-                score_uv = row["score"]
-                score_vu = rev_row.iloc[0]["score"]
-                mutual_rows.append({
-                    "u_node_id": u,
-                    "v_node_id": v,
-                    "score_uv": score_uv,
-                    "score_vu": score_vu,
-                    "score_mean": (score_uv + score_vu) / 2,
-                })
-
-    return pd.DataFrame(mutual_rows)
+    mutual_directed, _ = derive_mutual_edges_fast(directed_edges)
+    return mutual_directed

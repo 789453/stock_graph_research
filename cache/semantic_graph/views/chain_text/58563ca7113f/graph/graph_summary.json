@@ -1,0 +1,13 @@
+{
+  "n_nodes": 5502,
+  "k": 100,
+  "n_directed_edges": 550200,
+  "n_mutual_directed_rows": 317194,
+  "n_mutual_pairs_unique": 158597,
+  "reciprocity_ratio": 0.5765067248273356,
+  "score_q50": 0.7084323167800903,
+  "score_q90": 0.7854526162147522,
+  "score_q99": 0.8664682048559189,
+  "self_neighbor_count": 0,
+  "duplicate_stock_edge_count": 0
+}

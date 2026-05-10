@@ -1,0 +1,96 @@
+project:
+  phase: phase2_1
+  research_name: multi_view_semantic_graph_repair_and_monthly_ts
+  start_date: "20180101"
+  end_date: "20260423"
+  frequency: monthly
+
+boundaries:
+  allow_gnn: false
+  allow_backtest: false
+  allow_graph_factor: false
+  allow_ollama_labeling: false
+  allow_new_embedding: false
+  allow_application_scenarios_json: false
+
+views:
+  main_business_detail:
+    npy_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/main_business_detail/main_business_detail-all.npy
+    meta_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/main_business_detail/main_business_detail-all.meta.json
+  theme_text:
+    npy_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/theme_text/theme_text-all.npy
+    meta_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/theme_text/theme_text-all.meta.json
+  chain_text:
+    npy_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/chain_text/chain_text-all.npy
+    meta_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/chain_text/chain_text-all.meta.json
+  full_text:
+    npy_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/full_text/full_text-all.npy
+    meta_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/full_text/full_text-all.meta.json
+
+records:
+  records_path: /home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/parquet/records-all.parquet
+  expected_rows: 5502
+  expected_dim: 1024
+  expected_dtype: float32
+
+market_data:
+  stock_daily_path: /mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet
+  stock_daily_basic_path: /mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily_basic.parquet
+  stock_sw_member_path: /mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet
+
+graph:
+  k: 100
+  metric: inner_product_on_l2_normalized
+  faiss_gpu_device: 0
+  self_neighbor_policy: raise
+  duplicate_vector_score_threshold: 0.999999
+
+rank_bands_exclusive:
+  rank_001_005: [1, 5]
+  rank_006_010: [6, 10]
+  rank_011_020: [11, 20]
+  rank_021_050: [21, 50]
+  rank_051_100: [51, 100]
+
+topk_cumulative:
+  top_001_005: [1, 5]
+  top_001_010: [1, 10]
+  top_001_020: [1, 20]
+  top_001_050: [1, 50]
+  top_001_100: [1, 100]
+
+baselines:
+  random_seed: 20260510
+  n_random_repeats: 200
+  size_buckets: 10
+  liquidity_buckets: 10
+  amount_buckets: 10
+  min_market_matched_nodes: 5400
+  required_industry_comparison: true
+  baseline_types:
+    - global_random
+    - same_l3_random
+    - same_l3_same_size_random
+    - same_l3_same_liquidity_random
+    - cross_l1_random
+    - cross_l1_same_size_liquidity_random
+
+market_behavior:
+  monthly_return: true
+  lead_lag_months: [1, 2, 3]
+  min_common_months: 24
+  max_pairs_per_layer: 500000
+  residuals:
+    market: true
+    sw_l1: true
+    sw_l3: true
+    size_bucket: true
+    liquidity_bucket: true
+
+io:
+  preferred_reader: duckdb
+  use_projection_pushdown: true
+  use_predicate_pushdown: true
+  parquet_compression: zstd
+  progress_bar: true
+  progress_granularity: task
