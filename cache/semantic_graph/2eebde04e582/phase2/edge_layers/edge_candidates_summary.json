@@ -1,0 +1,14 @@
+{
+  "task": "T2.1",
+  "k": 100,
+  "edge_candidates_count": 550200,
+  "edge_candidates_k100_shape": [
+    5502,
+    100
+  ],
+  "generated_at": "2026-05-10T14:51:23.086236",
+  "adaptive_core_count": 49305,
+  "adaptive_core_nodes_covered": 4672,
+  "adaptive_context_count": 161140,
+  "adaptive_context_nodes_covered": 4467
+}

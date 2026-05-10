@@ -1,0 +1,22 @@
+{
+  "task_id": "T2.3",
+  "task_name": "Industry L1/L2/L3 baseline",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T14:54:28.386031",
+  "finished_at": "2026-05-10T14:54:28.386040",
+  "status": "success",
+  "inputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/edge_layers/edge_candidates_k100.parquet",
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/baselines/edges_with_industry.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/baselines/industry_baseline_results.json",
+    "/home/purple_born/QuantSum/stock_graph_research/outputs/reports/phase2/industry_baseline_by_rank.csv"
+  ],
+  "parameters": {},
+  "warnings": [
+    "当前申万行业标签，仅供参考（非历史真值）"
+  ],
+  "error": null
+}

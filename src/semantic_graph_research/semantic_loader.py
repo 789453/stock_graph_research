@@ -36,6 +36,21 @@ class SemanticAudit:
     alignment_ok: bool
     view: str
 
+@dataclass
+class AlignmentDiagnostics:
+    row_ids_count: int
+    records_count: int
+    row_ids_unique_count: int
+    records_record_id_unique_count: int
+    stock_code_unique_count: int
+    row_order_binding_ok: bool
+    missing_in_records_count: int
+    extra_in_records_count: int
+    duplicate_row_ids: list
+    duplicate_record_ids: list
+    duplicate_stock_codes: list
+    all_checks_passed: bool
+
 def _compute_file_fingerprint(path: Path) -> dict[str, str]:
     content = path.read_bytes()
     return {
@@ -134,6 +149,60 @@ def audit_semantic_bundle(bundle: SemanticBundle, config: dict[str, Any]) -> Sem
         view=bundle.view,
     )
 
+def diagnose_alignment(bundle: SemanticBundle, records_path: str | Path) -> AlignmentDiagnostics:
+    records_df = pd.read_parquet(records_path)
+
+    row_ids = bundle.row_ids
+    row_ids_count = len(row_ids)
+    row_ids_unique_count = len(set(row_ids))
+
+    records_count = len(records_df)
+    records_record_id_unique_count = records_df["record_id"].nunique()
+    stock_code_unique_count = records_df["stock_code"].nunique()
+
+    duplicate_row_ids = [rid for rid in set(row_ids) if row_ids.count(rid) > 1]
+    duplicate_record_ids = records_df[records_df["record_id"].duplicated()]["record_id"].unique().tolist()
+    duplicate_stock_codes = records_df[records_df["stock_code"].duplicated()]["stock_code"].unique().tolist()
+
+    records_record_ids = set(records_df["record_id"].tolist())
+    vectors_row_ids = set(row_ids)
+    missing_in_records = row_ids_count - len(vectors_row_ids.intersection(records_record_ids))
+    extra_in_records = records_count - len(vectors_row_ids.intersection(records_record_ids))
+
+    row_order_binding_ok = True
+    for i, record_id in enumerate(row_ids):
+        if record_id not in records_df["record_id"].values:
+            row_order_binding_ok = False
+            break
+        stock_code_in_records = records_df[records_df["record_id"] == record_id]["stock_code"].values[0]
+        if bundle.meta.get("row_stock_codes") and i < len(bundle.meta["row_stock_codes"]):
+            if bundle.meta["row_stock_codes"][i] != stock_code_in_records:
+                row_order_binding_ok = False
+                break
+
+    all_checks_passed = (
+        row_ids_count == row_ids_unique_count == records_record_id_unique_count == stock_code_unique_count
+        and len(duplicate_row_ids) == 0
+        and len(duplicate_record_ids) == 0
+        and len(duplicate_stock_codes) == 0
+        and row_order_binding_ok
+    )
+
+    return AlignmentDiagnostics(
+        row_ids_count=row_ids_count,
+        records_count=records_count,
+        row_ids_unique_count=row_ids_unique_count,
+        records_record_id_unique_count=records_record_id_unique_count,
+        stock_code_unique_count=stock_code_unique_count,
+        row_order_binding_ok=row_order_binding_ok,
+        missing_in_records_count=missing_in_records,
+        extra_in_records_count=extra_in_records,
+        duplicate_row_ids=duplicate_row_ids[:10],
+        duplicate_record_ids=duplicate_record_ids[:10],
+        duplicate_stock_codes=duplicate_stock_codes[:10],
+        all_checks_passed=all_checks_passed,
+    )
+
 def build_node_table(bundle: SemanticBundle, records_path: str | Path) -> pd.DataFrame:
     records_df = pd.read_parquet(records_path)
 
@@ -147,7 +216,11 @@ def build_node_table(bundle: SemanticBundle, records_path: str | Path) -> pd.Dat
 
     nodes = []
     for node_id, record_id in enumerate(bundle.row_ids):
+        if record_id not in record_id_to_info:
+            raise ValueError(f"record_id {record_id} not found in records at node_id {node_id}")
         info = record_id_to_info[record_id]
+        if node_id != bundle.row_ids.index(record_id):
+            raise ValueError(f"node_id {node_id} does not match row_ids index for record_id {record_id}")
         nodes.append({
             "node_id": node_id,
             "record_id": record_id,

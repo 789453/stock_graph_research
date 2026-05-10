@@ -1,0 +1,19 @@
+{
+  "task_id": "T2.2",
+  "task_name": "Edge layer statistics",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T14:53:10.867911",
+  "finished_at": "2026-05-10T14:53:10.867921",
+  "status": "success",
+  "inputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/edge_layers/edge_candidates_k100.parquet"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/outputs/reports/phase2/edge_layer_rank_band_stats.md",
+    "/home/purple_born/QuantSum/stock_graph_research/outputs/reports/phase2/edge_layer_rank_stats.md",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/edge_layers/edge_layer_summary.json"
+  ],
+  "parameters": {},
+  "warnings": [],
+  "error": null
+}

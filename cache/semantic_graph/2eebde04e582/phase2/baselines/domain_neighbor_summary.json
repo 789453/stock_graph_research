@@ -1,0 +1,129 @@
+{
+  "total_edges": 550200,
+  "size_quintile_stats": [
+    {
+      "size_quintile": 1,
+      "total_neighbors": 110100,
+      "same_size_ratio": 0.2092,
+      "same_size_mean_score": 0.6488,
+      "cross_size_mean_score": 0.6484
+    },
+    {
+      "size_quintile": 2,
+      "total_neighbors": 110000,
+      "same_size_ratio": 0.2021,
+      "same_size_mean_score": 0.653,
+      "cross_size_mean_score": 0.6545
+    },
+    {
+      "size_quintile": 3,
+      "total_neighbors": 110000,
+      "same_size_ratio": 0.2049,
+      "same_size_mean_score": 0.6636,
+      "cross_size_mean_score": 0.6618
+    },
+    {
+      "size_quintile": 4,
+      "total_neighbors": 110000,
+      "same_size_ratio": 0.2101,
+      "same_size_mean_score": 0.6688,
+      "cross_size_mean_score": 0.6652
+    },
+    {
+      "size_quintile": 5,
+      "total_neighbors": 110100,
+      "same_size_ratio": 0.3384,
+      "same_size_mean_score": 0.6917,
+      "cross_size_mean_score": 0.6733
+    }
+  ],
+  "liquidity_quintile_stats": [
+    {
+      "liquidity_quintile": 1,
+      "total_neighbors": 110100,
+      "same_liquidity_ratio": 0.3015,
+      "same_liquidity_mean_score": 0.6714,
+      "cross_liquidity_mean_score": 0.6594
+    },
+    {
+      "liquidity_quintile": 2,
+      "total_neighbors": 110000,
+      "same_liquidity_ratio": 0.2109,
+      "same_liquidity_mean_score": 0.6543,
+      "cross_liquidity_mean_score": 0.6599
+    },
+    {
+      "liquidity_quintile": 3,
+      "total_neighbors": 110000,
+      "same_liquidity_ratio": 0.1968,
+      "same_liquidity_mean_score": 0.6623,
+      "cross_liquidity_mean_score": 0.6605
+    },
+    {
+      "liquidity_quintile": 4,
+      "total_neighbors": 110000,
+      "same_liquidity_ratio": 0.2135,
+      "same_liquidity_mean_score": 0.6689,
+      "cross_liquidity_mean_score": 0.6624
+    },
+    {
+      "liquidity_quintile": 5,
+      "total_neighbors": 110100,
+      "same_liquidity_ratio": 0.2379,
+      "same_liquidity_mean_score": 0.6736,
+      "cross_liquidity_mean_score": 0.6611
+    }
+  ],
+  "rank_band_domain_ratio": [
+    {
+      "rank_band": "context",
+      "total": 165060,
+      "same_size_count": 38669,
+      "same_liquidity_count": 38445,
+      "same_domain_count": 10890,
+      "same_size_ratio": 0.2343,
+      "same_liquidity_ratio": 0.2329,
+      "same_domain_ratio": 0.066
+    },
+    {
+      "rank_band": "core",
+      "total": 27510,
+      "same_size_count": 7414,
+      "same_liquidity_count": 7043,
+      "same_domain_count": 2322,
+      "same_size_ratio": 0.2695,
+      "same_liquidity_ratio": 0.256,
+      "same_domain_ratio": 0.0844
+    },
+    {
+      "rank_band": "extended",
+      "total": 275100,
+      "same_size_count": 61733,
+      "same_liquidity_count": 62105,
+      "same_domain_count": 16655,
+      "same_size_ratio": 0.2244,
+      "same_liquidity_ratio": 0.2258,
+      "same_domain_ratio": 0.0605
+    },
+    {
+      "rank_band": "stable",
+      "total": 55020,
+      "same_size_count": 13339,
+      "same_liquidity_count": 13412,
+      "same_domain_count": 3999,
+      "same_size_ratio": 0.2424,
+      "same_liquidity_ratio": 0.2438,
+      "same_domain_ratio": 0.0727
+    },
+    {
+      "rank_band": "strong",
+      "total": 27510,
+      "same_size_count": 7022,
+      "same_liquidity_count": 6714,
+      "same_domain_count": 2084,
+      "same_size_ratio": 0.2553,
+      "same_liquidity_ratio": 0.2441,
+      "same_domain_ratio": 0.0758
+    }
+  ]
+}

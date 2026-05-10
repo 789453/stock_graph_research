@@ -1,0 +1,19 @@
+{
+  "task_id": "T2.5",
+  "task_name": "Domain neighbor analysis",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T14:58:44.250809",
+  "finished_at": "2026-05-10T14:58:44.250817",
+  "status": "success",
+  "inputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/edge_layers/edge_candidates_k100.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/baselines/node_size_liquidity_profile.parquet"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/baselines/edges_with_domain.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/baselines/domain_neighbor_summary.json"
+  ],
+  "parameters": {},
+  "warnings": [],
+  "error": null
+}

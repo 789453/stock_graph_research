@@ -1,0 +1,21 @@
+{
+  "task_id": "T2.6",
+  "task_name": "Hub and cross-industry bridge research",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T15:00:39.238095",
+  "finished_at": "2026-05-10T15:00:39.238105",
+  "status": "success",
+  "inputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/edge_layers/edge_candidates_k100.parquet",
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/hub_bridge/hubs_k100.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/hub_bridge/cross_industry_bridges.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/hub_bridge/node_hub_bridge_labels.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/hub_bridge/hub_bridge_summary.json"
+  ],
+  "parameters": {},
+  "warnings": [],
+  "error": null
+}

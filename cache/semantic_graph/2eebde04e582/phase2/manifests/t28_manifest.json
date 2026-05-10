@@ -1,0 +1,20 @@
+{
+  "task_id": "T2.8",
+  "task_name": "Semantic edge and market behavior association",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T15:04:14.334159",
+  "finished_at": "2026-05-10T15:04:14.334168",
+  "status": "success",
+  "inputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/edge_layers/edge_candidates_k100.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/market_behavior/node_market_panel_2018_2026.parquet"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/outputs/reports/phase2/edges_with_market_behavior.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/outputs/reports/phase2/semantic_market_association_summary.json",
+    "/home/purple_born/QuantSum/stock_graph_research/outputs/reports/phase2/rank_band_market_behavior.csv"
+  ],
+  "parameters": {},
+  "warnings": [],
+  "error": null
+}

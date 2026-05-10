@@ -1,0 +1,6 @@
+liquidity_quintile,total_neighbors,same_liquidity_ratio,same_liquidity_mean_score,cross_liquidity_mean_score
+1,110100,0.3015,0.6714,0.6594
+2,110000,0.2109,0.6543,0.6599
+3,110000,0.1968,0.6623,0.6605
+4,110000,0.2135,0.6689,0.6624
+5,110100,0.2379,0.6736,0.6611

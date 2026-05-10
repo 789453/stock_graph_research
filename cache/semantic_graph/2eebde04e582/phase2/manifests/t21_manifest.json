@@ -1,0 +1,26 @@
+{
+  "task_id": "T2.1",
+  "task_name": "Extended edge candidate pool",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T14:51:23.104511",
+  "finished_at": "2026-05-10T14:51:23.104523",
+  "status": "success",
+  "inputs": [
+    "cache/semantic_graph/2eebde04e582/nodes.parquet",
+    "cache/semantic_graph/2eebde04e582/neighbors_k100.npz",
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet"
+  ],
+  "outputs": [
+    "phase2/edge_layers/edge_candidates_k100.parquet",
+    "phase2/edge_layers/adaptive_core_edges.parquet",
+    "phase2/edge_layers/adaptive_context_edges.parquet",
+    "phase2/edge_layers/adaptive_cross_industry_bridge_edges.parquet",
+    "phase2/edge_layers/adaptive_within_l3_residual_edges.parquet",
+    "phase2/edge_layers/edge_candidates_summary.json"
+  ],
+  "parameters": {
+    "k": 100
+  },
+  "warnings": [],
+  "error": null
+}

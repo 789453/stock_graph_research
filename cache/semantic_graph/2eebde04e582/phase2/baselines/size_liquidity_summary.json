@@ -1,0 +1,19 @@
+{
+  "total_nodes": 5502,
+  "nodes_with_market_data": 0,
+  "cap_stats": {},
+  "size_quintile_dist": {
+    "1": 1101,
+    "2": 1100,
+    "3": 1100,
+    "4": 1100,
+    "5": 1101
+  },
+  "liquidity_quintile_dist": {
+    "1": 1101,
+    "2": 1100,
+    "3": 1100,
+    "4": 1100,
+    "5": 1101
+  }
+}

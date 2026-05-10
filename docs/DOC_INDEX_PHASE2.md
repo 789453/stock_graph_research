@@ -1,0 +1,22 @@
+# DOC_INDEX_PHASE2
+
+建议阅读顺序：
+
+1. `PROJECT_STATE.md`
+2. `docs/RESEARCH_CONSTITUTION.md`
+3. `docs/PHASE2_SEMANTIC_GRAPH_RESEARCH_IMPLEMENTATION_SPEC.md`
+4. `docs/PHASE2_RESEARCH_HYPOTHESES_AND_FALSIFICATION.md`
+5. `docs/PHASE2_CACHE_CONTRACTS.md`
+6. `docs/PHASE2_TASKS_00_02_REPAIR_AND_EDGE_LAYERS.md`
+7. `docs/PHASE2_TASKS_03_05_BASELINES_AND_DOMAINS.md`
+8. `docs/PHASE2_TASKS_06_09_HUB_BRIDGE_MARKET_BEHAVIOR.md`
+9. `docs/PHASE2_AI_WORKING_PROTOCOL_UPDATE.md`
+10. `configs/phase2_semantic_graph_research.yaml`
+
+Phase 2 最重要的边界：
+- 不做 GNN
+- 不做回测
+- 不做图因子
+- 不做 Ollama 标注
+- 不做生产化
+- 一切结果必须缓存

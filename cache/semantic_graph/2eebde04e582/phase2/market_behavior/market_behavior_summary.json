@@ -1,0 +1,28 @@
+{
+  "total_nodes": 5502,
+  "nodes_with_market_data": 5502,
+  "years_covered": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "annual_panel_records": 42578,
+  "market_stats": {
+    "avg_annual_return": {
+      "mean": 0.0628,
+      "median": 0.0269,
+      "std": 0.188
+    },
+    "avg_volatility": {
+      "mean": 0.0325,
+      "median": 0.0306,
+      "std": 0.0132
+    }
+  }
+}

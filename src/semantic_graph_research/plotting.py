@@ -4,23 +4,61 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 def plot_score_distribution_from_cache(cache_dir: Path, out_dir: Path) -> None:
-    import json
     k = 20
-    stats_path = cache_dir / f"graph_stats_k{k}.json"
-    if not stats_path.exists():
+    edges_path = cache_dir / f"edges_directed_k{k}.parquet"
+    if not edges_path.exists():
         return
 
-    with open(stats_path) as f:
-        stats = json.load(f)
+    edges = pd.read_parquet(edges_path)
 
-    fig, ax = plt.subplots(figsize=(8, 4))
-    ax.hist([stats["top1_score_mean"]], bins=20, alpha=0.7, label="Top1")
-    ax.hist([stats["top20_score_mean"]], bins=20, alpha=0.7, label="Top20")
-    ax.set_xlabel("Score")
-    ax.set_ylabel("Count")
-    ax.set_title(f"Score Distribution (k={k})\nview=application_scenarios_json\nPCA only for visualization")
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+    axes[0].hist(edges["score"], bins=50, alpha=0.7, edgecolor="black")
+    axes[0].set_xlabel("Score")
+    axes[0].set_ylabel("Count")
+    axes[0].set_title(f"All Directed Edge Scores (k={k})")
+    axes[0].axvline(edges["score"].mean(), color="red", linestyle="--", label=f"mean={edges['score'].mean():.3f}")
+    axes[0].legend()
+
+    rank_stats = edges.groupby("rank")["score"].agg(["mean", "median", "std", "count"])
+    rank_stats = rank_stats[rank_stats["count"] > 0]
+
+    axes[1].plot(rank_stats.index, rank_stats["mean"], marker="o", label="mean")
+    axes[1].fill_between(rank_stats.index, rank_stats["mean"] - rank_stats["std"], rank_stats["mean"] + rank_stats["std"], alpha=0.3)
+    axes[1].set_xlabel("Rank")
+    axes[1].set_ylabel("Score")
+    axes[1].set_title(f"Score by Rank (k={k})")
+    axes[1].legend()
+
+    fig.suptitle(f"True Score Distribution from edges_directed_k{k}.parquet\nview=application_scenarios_json", fontsize=11)
+    fig.tight_layout()
+    fig.savefig(out_dir / f"score_distribution_k{k}_true.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+def plot_score_by_rank_from_cache(cache_dir: Path, out_dir: Path) -> None:
+    k = 20
+    edges_path = cache_dir / f"edges_directed_k{k}.parquet"
+    if not edges_path.exists():
+        return
+
+    edges = pd.read_parquet(edges_path)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    rank_groups = edges.groupby("rank")["score"]
+    rank_means = rank_groups.mean()
+    rank_q25 = rank_groups.quantile(0.25)
+    rank_q75 = rank_groups.quantile(0.75)
+
+    ax.plot(rank_means.index, rank_means.values, marker="o", label="mean", linewidth=2)
+    ax.fill_between(rank_means.index, rank_q25.values, rank_q75.values, alpha=0.3, label="Q25-Q75")
+    ax.set_xlabel("Rank")
+    ax.set_ylabel("Score")
+    ax.set_title(f"Score by Rank with IQR (k={k})\nview=application_scenarios_json")
     ax.legend()
-    fig.savefig(out_dir / f"score_distribution_k{k}.png", dpi=150, bbox_inches="tight")
+    ax.grid(True, alpha=0.3)
+
+    fig.savefig(out_dir / f"score_by_rank_k{k}.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 def plot_degree_distribution_from_cache(cache_dir: Path, out_dir: Path) -> None:

@@ -1,0 +1,18 @@
+{
+  "task_id": "T2.4",
+  "task_name": "Size/Liquidity domain segmentation",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T14:57:38.776541",
+  "finished_at": "2026-05-10T14:57:38.776553",
+  "status": "success",
+  "inputs": [
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily_basic.parquet"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/baselines/node_size_liquidity_profile.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/baselines/size_liquidity_summary.json"
+  ],
+  "parameters": {},
+  "warnings": [],
+  "error": null
+}

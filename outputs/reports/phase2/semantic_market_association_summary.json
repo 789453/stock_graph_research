@@ -1,0 +1,56 @@
+{
+  "total_edges_analyzed": 550200,
+  "rank_band_behavior": [
+    {
+      "rank_band": "core",
+      "count": 27510,
+      "return_diff_mean": 0.1574,
+      "return_diff_std": 0.1949,
+      "vol_diff_mean": 0.0087,
+      "vol_diff_std": 0.0149
+    },
+    {
+      "rank_band": "strong",
+      "count": 27510,
+      "return_diff_mean": 0.16,
+      "return_diff_std": 0.1954,
+      "vol_diff_mean": 0.009,
+      "vol_diff_std": 0.0152
+    },
+    {
+      "rank_band": "stable",
+      "count": 55020,
+      "return_diff_mean": 0.1618,
+      "return_diff_std": 0.2006,
+      "vol_diff_mean": 0.0091,
+      "vol_diff_std": 0.0151
+    },
+    {
+      "rank_band": "context",
+      "count": 165060,
+      "return_diff_mean": 0.1617,
+      "return_diff_std": 0.1962,
+      "vol_diff_mean": 0.0092,
+      "vol_diff_std": 0.0149
+    },
+    {
+      "rank_band": "extended",
+      "count": 275100,
+      "return_diff_mean": 0.1641,
+      "return_diff_std": 0.1957,
+      "vol_diff_mean": 0.0095,
+      "vol_diff_std": 0.015
+    }
+  ],
+  "score_return_corr_k20": 0.0109,
+  "score_vol_corr_k20": -0.0146,
+  "industry_comparison": {},
+  "hub_comparison": {
+    "hub_avg_return_mean": 0.0967,
+    "hub_avg_return_std": 0.2029,
+    "non_hub_avg_return_mean": 0.061,
+    "non_hub_avg_return_std": 0.187,
+    "hub_count": 279,
+    "non_hub_count": 5223
+  }
+}

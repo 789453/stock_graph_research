@@ -43,6 +43,14 @@ def build_faiss_knn(vectors: np.ndarray, k: int, gpu_device: int = 0) -> Neighbo
                 count += 1
                 if count == k:
                     break
+        if count != k:
+            raise ValueError(f"row {i} only has {count} non-self neighbors, expected {k}")
+
+    row_ids = np.arange(n, dtype=np.int32)
+    has_self = (final_indices == row_ids[:, None]).any()
+    if has_self:
+        bad_rows = np.where((final_indices == row_ids[:, None]).any(axis=1))[0][:10]
+        raise ValueError(f"self-neighbor remains after removal, examples={bad_rows.tolist()}")
 
     return NeighborMatrix(indices=final_indices, scores=final_scores, k=k)
 

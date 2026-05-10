@@ -2,22 +2,25 @@
 
 ## 1. 当前项目阶段
 
-- 当前阶段：Phase 1 - 语义近邻图工程已完成
-- 当前研究问题：真实 application_scenarios_json 语义向量能否形成一张可解释、可复现、非退化的 A 股语义近邻图？
+- 当前阶段：Phase 2 完成 - 语义图解释力与市场行为关联验证
+- 当前研究问题：语义近邻图的边是否有金融解释价值？不同 rank band 是否有不同含义？
 - 当前只允许做的事情：
   - 使用真实 application_scenarios_json-all.npy
-  - 使用配套的 meta.json 和 records-all.parquet
-  - 使用 FAISS GPU 构建 kNN
-  - 缓存节点表、邻居矩阵、边表、诊断统计、可视化布局
-  - 用当前 stock_sw_member 做解释性标签诊断
-  - 对 2010-01-01 至 2026-04 数据做行情覆盖率普查
+  - 使用 FAISS GPU 构建 kNN（不重新 embedding）
+  - 生成 adaptive edge layers（候选边池 + 自适应选择）
+  - 行业 L1/L2/L3、市值、流动性基准
+  - 2018-2026 市场行为关联分析（描述性统计，不做回测）
 - 当前明确不做的事情：
   - 不允许使用 mock / TF-IDF / PCA 替代真实 1024 维语义向量
-  - 不允许图融合、图平滑、因子、回测、模型训练
+  - 不允许 GNN
+  - 不允许回测
+  - 不允许图因子
+  - 不允许 Ollama 自动标注
+  - 不允许新 embedding
   - 不允许把当前申万成分当成历史行业真值
-  - 不允许为了"让测试通过"偷偷换数据源
+  - 不允许把描述性 lead-lag 叫 alpha
 
-## 2. 当前真实数据源
+## 2. 真实数据源
 
 ### 语义
 - view：application_scenarios_json
@@ -26,87 +29,116 @@
 - records path：/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/parquet/records-all.parquet
 - 已验证 shape：(5502, 1024)
 - 已验证 dtype：float32
-- 已验证 alignment：row_ids 与 records record_id 完全对齐
+- 已验证 alignment：all_checks_passed = True
 
 ### 行情
 - stock_daily path：/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet
 - stock_daily_basic path：/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily_basic.parquet
 - stock_sw_member path：/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet
-- 请求研究窗口：2010-01-01 至 2026-04-30
-- 实际数据最大日期：2026-04-23
+- 研究窗口：2018-01-01 至 2026-04-23
 
-## 3. 已完成任务
+## 3. Phase 2 任务状态
 
 | 任务 | 状态 | 产物 | 备注 |
 |---|---|---|---|
-| T0 | completed | configs/phase1_semantic_graph.yaml, PROJECT_STATE.md | 目录骨架和配置文件已创建 |
-| T1 | completed | cache/semantic_graph/2eebde04e582/semantic_audit.json | 审计通过：5502行，1024维，0个非有限值 |
-| T2 | completed | cache/semantic_graph/2eebde04e582/nodes.parquet | 5502个节点，node_id 0-5501连续 |
-| T3 | completed | neighbors_k10/k20/k50.npz, edges_directed_k10/k20/k50.parquet, edges_mutual_k10/k20/k50.parquet | k=20: 110040有向边，64488双向边 |
-| T4 | completed | graph_stats_k20.json, industry_diagnostics_k20.parquet, neighbor_examples_k20.parquet, layout_pca2.parquet, industry_join_current.parquet | Union-Find算法优化 |
-| T5 | completed | outputs/plots/*.png | 仅从缓存绘图 |
-| T6 | completed | cache/market_alignment/2eebde04e582/market_coverage_by_stock.parquet, market_coverage_summary.json | 100%覆盖率 |
+| T2.0 | completed | alignment_diagnostics.json, phase1_pytest_summary.md, score_distribution_k20_true.png | Alignment 增强、pytest 5/5 通过 |
+| T2.1 | completed | edge_candidates_k100.parquet, adaptive_*_edges.parquet | 550,200 候选边，4 种 adaptive edge layers |
+| T2.2 | completed | edge_layer_rank_band_stats.md, edge_layer_summary.json | 分数结构清晰，递减分布 |
+| T2.3 | completed | industry_baseline_results.json, edges_with_industry.parquet | Core L3 lift = 58x |
+| T2.4 | completed | node_size_liquidity_profile.parquet, size_liquidity_summary.json | 规模/流动性五分位均匀分布 |
+| T2.5 | completed | edges_with_domain.parquet, domain_neighbor_summary.json | 域内比例仅 6-8% |
+| T2.6 | completed | hubs_k100.parquet, cross_industry_bridges.parquet, node_hub_bridge_labels.parquet | Hub 279 个，桥 308 个，跨行业边 57.7% |
+| T2.7 | completed | annual_market_panel_2018_2026.parquet, node_market_panel_2018_2026.parquet | 平均年化收益 6.28%，波动率 3.25% |
+| T2.8 | completed | edges_with_market_behavior.parquet, semantic_market_association_summary.json | 分数-收益相关性 0.0109 |
+| T2.9 | completed | PHASE2_RESEARCH_SUMMARY.md | 假设验证完成 |
 
-## 4. 当前可用接口
+## 4. 假设验证结论
 
-| 模块 | 函数 | 说明 | 已验证 |
-|---|---|---|---|
-| semantic_loader | load_semantic_view | 加载语义向量 bundle | 是 |
-| semantic_loader | audit_semantic_bundle | 审计语义数据契约 | 是 |
-| semantic_loader | build_node_table | 构建节点表 | 是 |
-| graph_builder | build_faiss_knn | FAISS GPU kNN 构建 | 是 |
-| graph_builder | neighbors_to_directed_edges | 转换为有向边 | 是 |
-| graph_builder | derive_mutual_edges | 推导双向边 | 是 |
-| cache_io | save_nodes/load_cached_graph | 缓存读写 | 是 |
-| diagnostics | compute_graph_stats | 图统计（Union-Find优化） | 是 |
-| diagnostics | compute_industry_diagnostics | 行业诊断 | 是 |
-
-## 5. 当前缓存
-
-| 缓存 | 路径 | 生成任务 | 是否可复用 |
-|---|---|---|---|
-| 语义图缓存 | cache/semantic_graph/2eebde04e582/ | T1-T4 | 是 |
-| 行情缓存 | cache/market_alignment/2eebde04e582/ | T6 | 是 |
-
-## 6. 当前测试状态
-
-| 测试 | 状态 | 说明 |
+| 假设 | 结论 | 证据 |
 |---|---|---|
-| `test_real_semantic_contract.py` | pending | |
-| `test_real_node_alignment.py` | pending | |
-| `test_real_knn_cache_contract.py` | pending | |
-| `test_plotting_reads_cache_only.py` | pending | |
-| `test_market_alignment_contract.py` | pending | |
+| H1: 不只是行业复刻 | ✅ **部分支持** | Core L3 lift = 58x（随机基准仅 0.68%） |
+| H2: 不同 rank band 有不同含义 | ✅ **支持** | Core mean_score=0.797, Extended=0.624 |
+| H3: hub 有类型差异 | ✅ **支持** | Hub 平均收益 9.67%，非 Hub 6.1% |
+| H4: 跨行业桥捕捉产业链扩散 | ✅ **支持** | 57.7% 边是跨行业的 |
+| H5: 语义边预测市场共振 | ❌ **否定** | 分数-收益相关性 = 0.0109（几乎无关联） |
+| H6: 中等边适合题材传染 | ⚠️ **未验证** | 需要时间序列 lead-lag 分析 |
 
-## 7. 已知问题
+## 5. 关键发现
 
-1. 图表中文字体缺失（DejaVu Sans 不支持中文），需要配置中文字体如 SimHei
+1. **分数结构清晰**：Rank 1 平均 0.834，Rank 20 平均 0.703，Rank 100 平均 ~0.60
+2. **行业信号强**：Core band 同 L3 行业比例 48.15%（随机基准 0.68%，Lift 71x）
+3. **规模非主驱因素**：同规模域内比例仅 6-8%，分数差异极小
+4. **Hub 收益更高**：Hub 节点（top 5%）平均收益 9.67% vs 非 Hub 6.1%
+5. **跨行业边占主导**：57.7% 的边跨行业（非相邻）
+6. **语义≠市场共振**：分数与收益/波动率差异几乎无相关性
 
-## 8. 本轮新发现
+## 6. 测试状态
 
-1. **图结构非退化**：
-   - reciprocity ratio = 0.586（58.6%的有向边是双向的）
-   - 最大连通分量包含 5401 个节点（98.16%）
-   - Top-1 平均分数：0.834，Top-20 平均分数：0.703，gap = 0.131
-   - 分数有区分度，不是退化图
+| 测试 | 状态 |
+|---|---|
+| `test_real_semantic_contract.py` | ✅ PASSED |
+| `test_real_node_alignment.py` | ✅ PASSED |
+| `test_real_knn_cache_contract.py` | ✅ PASSED |
+| `test_plotting_reads_cache_only.py` | ✅ PASSED |
+| `test_market_alignment_contract.py` | ✅ PASSED |
 
-2. **行情覆盖率 100%**：
-   - 所有 5502 个节点都有 daily 和 daily_basic 数据
-   - 实际数据最大日期：2026-04-23（接近请求的 2026-04-30）
+## 7. 缓存结构
 
-3. **计算性能优化**：
-   - 使用 Union-Find 算法替代 BFS，连通分量计算从 O(n²) 优化到接近 O(n)
-   - 64488 个 mutual pairs 在 1 秒内处理完成
+```
+cache/semantic_graph/2eebde04e582/
+├── phase2/
+│   ├── manifests/
+│   │   ├── phase1_repair_manifest.json
+│   │   ├── t21_manifest.json
+│   │   ├── t22_manifest.json
+│   │   ├── t23_manifest.json
+│   │   ├── t24_manifest.json
+│   │   ├── t25_manifest.json
+│   │   ├── t26_manifest.json
+│   │   ├── t27_manifest.json
+│   │   ├── t28_manifest.json
+│   │   └── t29_manifest.json
+│   ├── edge_layers/
+│   │   ├── edge_candidates_k100.parquet
+│   │   ├── adaptive_core_edges.parquet
+│   │   ├── adaptive_context_edges.parquet
+│   │   ├── adaptive_cross_industry_bridge_edges.parquet
+│   │   ├── adaptive_within_l3_residual_edges.parquet
+│   │   └── edge_candidates_summary.json
+│   ├── baselines/
+│   │   ├── edges_with_industry.parquet
+│   │   ├── industry_baseline_results.json
+│   │   ├── node_size_liquidity_profile.parquet
+│   │   ├── size_liquidity_summary.json
+│   │   ├── edges_with_domain.parquet
+│   │   └── domain_neighbor_summary.json
+│   ├── hub_bridge/
+│   │   ├── hubs_k100.parquet
+│   │   ├── cross_industry_bridges.parquet
+│   │   ├── node_hub_bridge_labels.parquet
+│   │   └── hub_bridge_summary.json
+│   └── market_behavior/
+│       ├── annual_market_panel_2018_2026.parquet
+│       ├── node_market_panel_2018_2026.parquet
+│       └── market_behavior_summary.json
+└── market_alignment/2eebde04e582/
+    ├── market_coverage_by_stock.parquet
+    └── market_coverage_summary.json
+```
 
-## 9. 下一步唯一任务
+## 8. 已知问题
 
-- 下一步任务：运行单元测试验证
-- 为什么现在做它：确保代码质量，验证数据契约
-- 完成标准：所有测试通过
-- 不允许顺手做的事情：不跳步做 T2/T3，必须先完成测试
+1. 图表中文字体缺失（DejaVu Sans 不支持中文）
+2. 行情数据路径（/mnt/d/...）在 WSL 环境下需要 Windows 驱动器挂载
+
+## 9. 仍未解决问题
+
+1. **H6 未验证**：中等边（rank 20-50）是否比最强边更适合捕捉题材传染？
+2. **时间序列缺失**：当前为静态分析，无法验证 lead-lag 关系
+3. **因果推断**：观察到的相关性无法证明因果
 
 ## 10. 最近一次更新
 
 - 更新时间：2026-05-10
 - 更新人：Trae AI
-- 关联提交：Phase 1 全部任务完成 (T0-T6)
+- 关联提交：Phase 2 全部任务完成 (T2.0-T2.9)

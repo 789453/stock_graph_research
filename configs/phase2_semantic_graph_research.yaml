@@ -1,0 +1,98 @@
+project:
+  phase: "phase2"
+  research_name: "semantic_graph_explanatory_finance"
+  upstream_phase1_cache_key: "2eebde04e582"
+  semantic_view: "application_scenarios_json"
+
+boundaries:
+  allow_gnn: false
+  allow_backtest: false
+  allow_graph_factor: false
+  allow_ollama_labeling: false
+  allow_new_embedding: false
+  allow_mock_core_data: false
+  allow_phase1_cache_reuse: true
+
+paths:
+  phase1_config: "configs/phase1_semantic_graph.yaml"
+  semantic_graph_cache: "cache/semantic_graph/2eebde04e582"
+  phase2_cache: "cache/semantic_graph/2eebde04e582/phase2"
+  stock_daily_path: "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet"
+  stock_daily_basic_path: "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily_basic.parquet"
+  stock_sw_member_path: "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet"
+  logs_dir: "logs/phase2"
+  plots_dir: "outputs/plots/phase2"
+  reports_dir: "outputs/reports/phase2"
+
+graph_candidate:
+  candidate_k_existing: [10, 20, 50]
+  candidate_k_optional_new: 100
+  build_k100_if_missing: true
+  metric: "inner_product_cosine_on_l2_normalized_vectors"
+  mutual_definition: "reciprocal_directed_edge_rows"
+  unique_undirected_pair_definition: "min(u,v),max(u,v)"
+  rank_bands:
+    core: [1, 5]
+    strong: [1, 10]
+    stable: [1, 20]
+    context: [21, 50]
+    extended: [51, 100]
+  score_quantiles: [0.50, 0.70, 0.80, 0.90, 0.95, 0.99]
+  adaptive_rules:
+    min_neighbors: 3
+    max_neighbors: 50
+    max_rank: 100
+    keep_mutual_always: true
+    local_score_gap_quantile: 0.75
+
+industry_baselines:
+  levels: ["l1_name", "l2_name", "l3_name"]
+  treat_current_sw_as_normalized_member: true
+  random_seed: 20260510
+  n_random_repeats: 200
+  buckets:
+    market_cap_quantiles: 10
+    liquidity_quantiles: 10
+  baseline_types:
+    - global_random
+    - same_l1_random
+    - same_l2_random
+    - same_l3_random
+    - same_market_cap_bucket_random
+    - same_liquidity_bucket_random
+    - same_l3_and_mv_bucket_random
+    - cross_l1_random
+
+market_behavior:
+  start_date: "20180101"
+  end_date: "20260423"
+  horizons: [1, 5, 20]
+  returns:
+    use_pct_chg: true
+    winsorize_quantiles: [0.001, 0.999]
+  neutralization:
+    market_return: true
+    current_sw_l1: true
+    current_sw_l3: true
+    market_cap_bucket: true
+  pair_sampling:
+    max_pairs_per_layer_for_corr: 500000
+    preserve_all_core_edges: true
+  metrics:
+    - return_corr_daily
+    - return_corr_weekly
+    - return_corr_monthly
+    - residual_return_corr
+    - volatility_corr
+    - amount_shock_corr
+    - extreme_down_cooccurrence
+    - extreme_up_cooccurrence
+
+io:
+  engine_priority: ["duckdb", "polars"]
+  use_predicate_pushdown: true
+  use_projection_pushdown: true
+  write_parquet_compression: "zstd"
+  progress_bar: true
+  progress_granularity: "task_level"
+  log_level: "INFO"

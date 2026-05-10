@@ -1,0 +1,115 @@
+{
+  "total_edges": 550200,
+  "total_nodes": 5502,
+  "mutual_edge_count": 550200,
+  "mutual_ratio": 1.0,
+  "rank_band_distribution": {
+    "extended": 275100,
+    "context": 165060,
+    "stable": 55020,
+    "core": 27510,
+    "strong": 27510
+  },
+  "score_global_mean": 0.6621,
+  "score_global_std": 0.083,
+  "score_global_min": 0.3039,
+  "score_global_max": 1.0,
+  "rank_band_stats": {
+    "count": {
+      "context": 165060,
+      "core": 27510,
+      "extended": 275100,
+      "stable": 55020,
+      "strong": 27510
+    },
+    "mean": {
+      "context": 0.6700000166893005,
+      "core": 0.796999990940094,
+      "extended": 0.6241000294685364,
+      "stable": 0.7170000076293945,
+      "strong": 0.7497000098228455
+    },
+    "median": {
+      "context": 0.6736999750137329,
+      "core": 0.7997999787330627,
+      "extended": 0.6294999718666077,
+      "stable": 0.718999981880188,
+      "strong": 0.7516000270843506
+    },
+    "std": {
+      "context": 0.06909999996423721,
+      "core": 0.07000000029802322,
+      "extended": 0.06589999794960022,
+      "stable": 0.06930000334978104,
+      "strong": 0.06849999725818634
+    },
+    "min": {
+      "context": 0.32280001044273376,
+      "core": 0.5159000158309937,
+      "extended": 0.30390000343322754,
+      "stable": 0.46790000796318054,
+      "strong": 0.4975999891757965
+    },
+    "max": {
+      "context": 1.0,
+      "core": 1.0,
+      "extended": 0.8184000253677368,
+      "stable": 1.0,
+      "strong": 1.0
+    },
+    "p25": {
+      "context": 0.6285,
+      "core": 0.7528,
+      "extended": 0.5852,
+      "stable": 0.6727,
+      "strong": 0.7065
+    },
+    "p75": {
+      "context": 0.7154,
+      "core": 0.8446,
+      "extended": 0.6692,
+      "stable": 0.7611,
+      "strong": 0.7936
+    },
+    "p90": {
+      "context": 0.7492,
+      "core": 0.8831,
+      "extended": 0.7027,
+      "stable": 0.7979,
+      "strong": 0.831
+    },
+    "p95": {
+      "context": 0.7692,
+      "core": 0.9052,
+      "extended": 0.72,
+      "stable": 0.822,
+      "strong": 0.8557
+    }
+  },
+  "quantile_stats": {
+    "p50": {
+      "count": 275100,
+      "mean_score_if_selected": 0.7257000207901001
+    },
+    "p70": {
+      "count": 165060,
+      "mean_score_if_selected": 0.7563999891281128
+    },
+    "p80": {
+      "count": 110041,
+      "mean_score_if_selected": 0.7782999873161316
+    },
+    "p90": {
+      "count": 55020,
+      "mean_score_if_selected": 0.8138999938964844
+    },
+    "p95": {
+      "count": 27510,
+      "mean_score_if_selected": 0.847599983215332
+    },
+    "p99": {
+      "count": 5502,
+      "mean_score_if_selected": 0.9205999970436096
+    }
+  }
+}

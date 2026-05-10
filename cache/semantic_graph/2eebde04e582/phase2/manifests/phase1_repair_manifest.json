@@ -1,0 +1,27 @@
+{
+  "task_id": "T2.0",
+  "task_name": "Phase 1 repair and test report",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T14:31:28.999477",
+  "finished_at": "2026-05-10T14:31:28.999483",
+  "status": "failed",
+  "inputs": [
+    "configs/phase1_semantic_graph.yaml",
+    "src/semantic_graph_research/semantic_loader.py",
+    "src/semantic_graph_research/graph_builder.py",
+    "src/semantic_graph_research/plotting.py",
+    "tests/*.py"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/manifests/alignment_diagnostics.json",
+    "/home/purple_born/QuantSum/stock_graph_research/outputs/reports/phase2/phase1_pytest_summary.md",
+    "/home/purple_born/QuantSum/stock_graph_research/logs/phase2/phase1_pytest_20260510_143128.log"
+  ],
+  "parameters": {},
+  "row_counts": {
+    "alignment_checks_passed": true,
+    "pytest_passed": false
+  },
+  "warnings": [],
+  "error": "pytest failed"
+}

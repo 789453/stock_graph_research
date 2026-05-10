@@ -1,0 +1,21 @@
+{
+  "task_id": "T2.7",
+  "task_name": "Market behavior panel 2018-2026",
+  "phase1_cache_key": "2eebde04e582",
+  "started_at": "2026-05-10T15:02:57.381741",
+  "finished_at": "2026-05-10T15:02:57.381754",
+  "status": "success",
+  "inputs": [
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet"
+  ],
+  "outputs": [
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/market_behavior/annual_market_panel_2018_2026.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/market_behavior/node_market_panel_2018_2026.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/cache/semantic_graph/2eebde04e582/phase2/market_behavior/market_behavior_summary.json"
+  ],
+  "parameters": {
+    "window": "2018-2026"
+  },
+  "warnings": [],
+  "error": null
+}
