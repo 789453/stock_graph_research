@@ -1,0 +1,20 @@
+[2026-05-10 11:07:29] 开始执行首次推送脚本
+============================================================
+Git: 首次上传到 main 分支（Token 认证）
+============================================================
+[2026-05-10 11:07:29] [1/7] Git 仓库已存在，跳过初始化...
+[2026-05-10 11:07:29] 配置 git 用户信息...
+[2026-05-10 11:07:29] [2/7] 配置远程仓库（Token 认证）...
+[2026-05-10 11:07:29] [3/7] 添加文件到暂存区...
+[2026-05-10 11:07:29] [4/7] 暂存文件状态:
+AM git_push_first_20260510_110729.log
+M  scripts/git_push_to_main.sh
+M  scripts/git_update_main.sh
+[2026-05-10 11:07:29] [5/7] 提交到 main 分支...
+[main d363657] Phase 1: 语义近邻图工程初始化
+ 3 files changed, 158 insertions(+), 43 deletions(-)
+ create mode 100644 git_push_first_20260510_110729.log
+ mode change 100644 => 100755 scripts/git_update_main.sh
+[2026-05-10 11:07:29] [6/7] 推送到 origin/main（最多重试3次）...
+remote: Permission to 789453/stock_graph_research.git denied to 789453.
+fatal: unable to access 'https://github.com/789453/stock_graph_research.git/': The requested URL returned error: 403
