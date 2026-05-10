@@ -1,0 +1,10 @@
+{
+  "n_stocks": 5502,
+  "n_months": 100,
+  "start_month": "2018-01",
+  "end_month": "2026-04",
+  "total_rows": 443892,
+  "avg_stocks_per_month": 4438.92,
+  "missing_return_ratio": 2.2528002306867434e-06,
+  "timestamp": "2026-05-10T13:46:55"
+}

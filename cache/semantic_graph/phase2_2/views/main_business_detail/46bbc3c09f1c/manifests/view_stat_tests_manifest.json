@@ -1,0 +1,15 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.7",
+  "task_name": "statistical_tests",
+  "view_name": "main_business_detail",
+  "view_key": "46bbc3c09f1c",
+  "status": "success",
+  "started_at": "2026-05-10T14:13:27",
+  "finished_at": "2026-05-10T14:13:27",
+  "elapsed_seconds": 0.4719123840332031,
+  "outputs": [
+    "cache/semantic_graph/phase2_2/views/main_business_detail/46bbc3c09f1c/phase2_2/stat_tests/h5_metric_tests.csv"
+  ],
+  "safe_to_continue": true
+}

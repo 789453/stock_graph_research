@@ -1,0 +1,11 @@
+view,regime,rank_band,mean_corr
+theme_text,bull_market,rank_001_005,0.0020783415529876
+theme_text,bull_market,rank_006_010,0.0017347334651276
+theme_text,bull_market,rank_011_020,0.0011741234920918
+theme_text,bull_market,rank_021_050,0.0013766257325187
+theme_text,bull_market,rank_051_100,0.0007233427022583
+theme_text,bear_market,rank_001_005,0.0027711221482604
+theme_text,bear_market,rank_006_010,0.0023129780311137
+theme_text,bear_market,rank_011_020,0.001565498067066
+theme_text,bear_market,rank_021_050,0.0018355010543018
+theme_text,bear_market,rank_051_100,0.0009644569945521

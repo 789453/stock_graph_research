@@ -1,0 +1,17 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.6",
+  "task_name": "compute_edge_market_metrics",
+  "view_name": "full_text",
+  "view_key": "e7a0080f4bc8",
+  "status": "success",
+  "started_at": "2026-05-10T14:12:30",
+  "finished_at": "2026-05-10T14:13:17",
+  "elapsed_seconds": 46.49124026298523,
+  "outputs": [
+    "cache/semantic_graph/phase2_2/views/full_text/e7a0080f4bc8/phase2_2/market_behavior/edge_market_metrics.parquet",
+    "cache/semantic_graph/phase2_2/views/full_text/e7a0080f4bc8/phase2_2/market_behavior/edge_market_metrics_by_layer.csv",
+    "cache/semantic_graph/phase2_2/views/full_text/e7a0080f4bc8/phase2_2/market_behavior/random_baseline_market_metrics.csv"
+  ],
+  "safe_to_continue": true
+}

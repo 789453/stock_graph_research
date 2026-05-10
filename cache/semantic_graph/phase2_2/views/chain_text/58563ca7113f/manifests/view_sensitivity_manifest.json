@@ -1,0 +1,15 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.8",
+  "task_name": "hub_duplicate_sensitivity",
+  "view_name": "chain_text",
+  "view_key": "58563ca7113f",
+  "status": "success",
+  "started_at": "2026-05-10T14:13:39",
+  "finished_at": "2026-05-10T14:13:39",
+  "elapsed_seconds": 0.38535380363464355,
+  "outputs": [
+    "cache/semantic_graph/phase2_2/views/chain_text/58563ca7113f/phase2_2/hub_bridge/sensitivity_analysis.csv"
+  ],
+  "safe_to_continue": true
+}

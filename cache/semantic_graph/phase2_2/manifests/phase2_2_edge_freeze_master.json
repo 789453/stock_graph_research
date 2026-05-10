@@ -1,0 +1,12 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.2",
+  "timestamp": "2026-05-10T13:45:59",
+  "status": "success",
+  "views": [
+    "main_business_detail",
+    "theme_text",
+    "chain_text",
+    "full_text"
+  ]
+}

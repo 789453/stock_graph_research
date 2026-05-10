@@ -1,0 +1,28 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.3",
+  "task_name": "build_market_monthly_panel",
+  "status": "success",
+  "started_at": "2026-05-10T13:46:54",
+  "finished_at": "2026-05-10T13:46:55",
+  "elapsed_seconds": 1.6641554832458496,
+  "inputs": [
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet",
+    "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily_basic.parquet",
+    "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/parquet/records-all.parquet"
+  ],
+  "outputs": [
+    "cache/semantic_graph/phase2_2/market_panel/node_monthly_panel.parquet"
+  ],
+  "row_counts": {
+    "n_stocks": 5502,
+    "n_months": 100,
+    "start_month": "2018-01",
+    "end_month": "2026-04",
+    "total_rows": 443892,
+    "avg_stocks_per_month": 4438.92,
+    "missing_return_ratio": 2.2528002306867434e-06,
+    "timestamp": "2026-05-10T13:46:55"
+  },
+  "safe_to_continue": true
+}

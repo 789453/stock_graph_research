@@ -1,0 +1,7 @@
+{
+  "caption": "综合对比四个语义视图在控制组下的表现，锁定最优视图。",
+  "plot_name": "h5_multi_view_comparison",
+  "phase": "phase2_2",
+  "source_csv": "h5_multi_view_comparison.csv",
+  "generated_at": "2026-05-10T14:25:48"
+}

@@ -1,0 +1,39 @@
+{
+  "phase": "phase2_2",
+  "h5_decision": "PARTIALLY_SUPPORTED",
+  "best_view": "main_business_detail",
+  "view_metrics": [
+    {
+      "name": "main_business_detail",
+      "key": "46bbc3c09f1c",
+      "supported_bands": [
+        "rank_011_020"
+      ],
+      "top_band_corr": 0.0025814297,
+      "is_hub_robust": true
+    },
+    {
+      "name": "theme_text",
+      "key": "07a2d5b269d2",
+      "supported_bands": [],
+      "top_band_corr": 0.0023092683,
+      "is_hub_robust": true
+    },
+    {
+      "name": "chain_text",
+      "key": "58563ca7113f",
+      "supported_bands": [],
+      "top_band_corr": 0.002273615,
+      "is_hub_robust": true
+    },
+    {
+      "name": "full_text",
+      "key": "e7a0080f4bc8",
+      "supported_bands": [],
+      "top_band_corr": 0.0018730906,
+      "is_hub_robust": true
+    }
+  ],
+  "total_plots_generated": 145,
+  "timestamp": "2026-05-10T14:31:19"
+}

@@ -1,0 +1,45 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.2",
+  "task_name": "multi_view_edge_layer_freeze",
+  "view_name": "chain_text",
+  "view_key": "58563ca7113f",
+  "status": "success",
+  "started_at": "2026-05-10T13:45:57",
+  "finished_at": "2026-05-10T13:45:58",
+  "elapsed_seconds": 0.9256067276000977,
+  "inputs": [
+    "cache/semantic_graph/views/chain_text/58563ca7113f/manifests/view_audit_manifest.json",
+    "cache/semantic_graph/views/chain_text/58563ca7113f/graph/neighbors_k100.npz"
+  ],
+  "outputs": [
+    "cache/semantic_graph/phase2_2/views/chain_text/58563ca7113f/edge_layers/edge_candidates_k100_fixed.parquet",
+    "cache/semantic_graph/phase2_2/views/chain_text/58563ca7113f/edge_layers/edge_layer_summary.json"
+  ],
+  "parameters": {
+    "k": 100
+  },
+  "row_counts": {
+    "view_name": "chain_text",
+    "view_key": "58563ca7113f",
+    "n_nodes": 5502,
+    "k": 100,
+    "n_edges": 550200,
+    "mutual_directed_rows": 317194,
+    "mutual_pairs_unique": 158597,
+    "reciprocity_ratio": 0.5765067248273356,
+    "reverse_score_nonnull_ratio": 1.0,
+    "near_duplicate_edges_count": 930,
+    "rank_band_counts": {
+      "rank_051_100": 275100,
+      "rank_021_050": 165060,
+      "rank_011_020": 55020,
+      "rank_001_005": 27510,
+      "rank_006_010": 27510
+    },
+    "status": "success",
+    "timestamp": "2026-05-10T13:45:58"
+  },
+  "warnings": [],
+  "safe_to_continue": true
+}

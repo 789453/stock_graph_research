@@ -1,0 +1,7 @@
+{
+  "caption": "验证语义近邻是否在极端行情下表现出协同效应。",
+  "plot_name": "extreme_cooccurrence_by_view",
+  "phase": "phase2_2",
+  "source_csv": "extreme_cooccurrence_by_view.csv",
+  "generated_at": "2026-05-10T14:25:46"
+}

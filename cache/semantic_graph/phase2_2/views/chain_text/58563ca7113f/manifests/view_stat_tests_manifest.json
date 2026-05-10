@@ -1,0 +1,15 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.7",
+  "task_name": "statistical_tests",
+  "view_name": "chain_text",
+  "view_key": "58563ca7113f",
+  "status": "success",
+  "started_at": "2026-05-10T14:13:27",
+  "finished_at": "2026-05-10T14:13:28",
+  "elapsed_seconds": 0.429332971572876,
+  "outputs": [
+    "cache/semantic_graph/phase2_2/views/chain_text/58563ca7113f/phase2_2/stat_tests/h5_metric_tests.csv"
+  ],
+  "safe_to_continue": true
+}

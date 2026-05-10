@@ -1,0 +1,16 @@
+{
+  "task_id": "T2.2.0",
+  "status": "success",
+  "checked_at": "2026-05-10T13:45:29",
+  "required_functions": {
+    "derive_mutual_edges_fast": true,
+    "prepare_nodes_index": true,
+    "assign_rank_band_exclusive": true,
+    "build_edge_candidates_fixed": true
+  },
+  "forbidden_patterns": {
+    "score_dict_integer_key_reverse_score": false,
+    "legacy_rank_band_names_in_main_path": false
+  },
+  "blocking_errors": []
+}

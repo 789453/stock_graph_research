@@ -1,0 +1,42 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.5",
+  "task_name": "generate_matched_random_edges",
+  "view_name": "theme_text",
+  "view_key": "07a2d5b269d2",
+  "status": "success",
+  "n_repeats": 50,
+  "bands": [
+    "rank_001_005",
+    "rank_006_010",
+    "rank_011_020"
+  ],
+  "baseline_types": [
+    "global_random",
+    "same_l3_random",
+    "same_l3_same_size_random",
+    "cross_l1_random"
+  ],
+  "outputs": {
+    "rank_001_005": {
+      "global_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_001_005_global_random.npy",
+      "same_l3_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_001_005_same_l3_random.npy",
+      "same_l3_same_size_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_001_005_same_l3_same_size_random.npy",
+      "cross_l1_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_001_005_cross_l1_random.npy"
+    },
+    "rank_006_010": {
+      "global_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_006_010_global_random.npy",
+      "same_l3_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_006_010_same_l3_random.npy",
+      "same_l3_same_size_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_006_010_same_l3_same_size_random.npy",
+      "cross_l1_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_006_010_cross_l1_random.npy"
+    },
+    "rank_011_020": {
+      "global_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_011_020_global_random.npy",
+      "same_l3_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_011_020_same_l3_random.npy",
+      "same_l3_same_size_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_011_020_same_l3_same_size_random.npy",
+      "cross_l1_random": "cache/semantic_graph/phase2_2/views/theme_text/07a2d5b269d2/phase2_2/baselines/random_dst_rank_011_020_cross_l1_random.npy"
+    }
+  },
+  "elapsed_seconds": 2.4703071117401123,
+  "safe_to_continue": true
+}

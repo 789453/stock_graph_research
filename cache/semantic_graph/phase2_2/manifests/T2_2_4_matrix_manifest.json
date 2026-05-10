@@ -1,0 +1,30 @@
+{
+  "phase": "phase2_2",
+  "task_id": "T2.2.4",
+  "task_name": "build_residual_matrices",
+  "status": "success",
+  "started_at": "2026-05-10T13:47:17",
+  "finished_at": "2026-05-10T13:47:20",
+  "elapsed_seconds": 2.3977372646331787,
+  "inputs": [
+    "cache/semantic_graph/phase2_2/market_panel/node_monthly_panel.parquet"
+  ],
+  "outputs": [
+    "cache/semantic_graph/phase2_2/market_panel/matrices/monthly_return.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/ret_resid_market.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/ret_resid_l1.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/ret_resid_l3.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/ret_resid_size_liquidity.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/ret_resid_full_neutral.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/volatility.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/amount_z.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/turnover_z.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/extreme_up.npy",
+    "cache/semantic_graph/phase2_2/market_panel/matrices/extreme_down.npy"
+  ],
+  "row_counts": {
+    "n_stocks": 5502,
+    "n_months": 100
+  },
+  "safe_to_continue": true
+}

@@ -1,0 +1,11 @@
+rank_band_exclusive,variable,value
+rank_001_005,corr_raw_return,0.21905407
+rank_006_010,corr_raw_return,0.21666166
+rank_011_020,corr_raw_return,0.21724014
+rank_021_050,corr_raw_return,0.216168
+rank_051_100,corr_raw_return,0.21604018
+rank_001_005,corr_resid_full_neutral,0.002273615
+rank_006_010,corr_resid_full_neutral,0.0022975327
+rank_011_020,corr_resid_full_neutral,0.0017891759
+rank_021_050,corr_resid_full_neutral,0.00130465
+rank_051_100,corr_resid_full_neutral,0.00079889654
