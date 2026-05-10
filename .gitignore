@@ -4,7 +4,7 @@
 # ==================================================
 /a_share_semantic_dataset/**
 !/a_share_semantic_dataset/npy/
-/a_share_semantic_dataset/npy/**
+!/a_share_semantic_dataset/npy/*/
 !/a_share_semantic_dataset/npy/*/*.json
 
 # ==================================================
