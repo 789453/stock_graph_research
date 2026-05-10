@@ -1,0 +1,17 @@
+{
+  "task": "T6",
+  "semantic_cache_key": "2eebde04e582",
+  "requested_window": "20100101_20260430",
+  "actual_max_date": "20260423",
+  "coverage": {
+    "requested_start_date": "20100101",
+    "requested_end_date": "20260430",
+    "actual_data_max_date": "20260423",
+    "total_nodes": 5502,
+    "stocks_with_daily": 5502,
+    "stocks_with_daily_basic": 5502,
+    "stocks_with_daily_ratio": 1.0,
+    "stocks_with_basic_ratio": 1.0,
+    "no补造": true
+  }
+}

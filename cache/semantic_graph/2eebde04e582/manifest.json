@@ -1,0 +1,44 @@
+{
+  "task": "T4",
+  "cache_key": "2eebde04e582",
+  "view": "application_scenarios_json",
+  "audit": {
+    "rows": 5502,
+    "dim": 1024,
+    "dtype": "float32",
+    "non_finite_count": 0,
+    "zero_norm_count": 0,
+    "l2_min": 0.9999998211860657,
+    "l2_mean": 1.0,
+    "l2_max": 1.0000001192092896,
+    "row_id_unique_count": 5502,
+    "alignment_ok": true,
+    "view": "application_scenarios_json",
+    "fingerprints": {
+      "vectors": {
+        "path": "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/application_scenarios_json/application_scenarios_json-all.npy",
+        "sha256": "1ad92d1b1cb699aaae70b06e0759b2c0629f75791eb5dde1982f62e9335ce814",
+        "size": 22536320,
+        "mtime": "1776329095.8494878"
+      },
+      "meta": {
+        "path": "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/application_scenarios_json/application_scenarios_json-all.meta.json",
+        "sha256": "afa718c842e90c638d6b32d963e269aa76b0c8d4c96c6c08d1f5e55993dcbb31",
+        "size": 181955,
+        "mtime": "1776329095.9809675"
+      },
+      "records": {
+        "path": "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/parquet/records-all.parquet",
+        "sha256": "fbbb7d15c4def8d041f98358fcd2b5fd6d1da4b199e0afdfc6589a7396c095c1",
+        "size": 35247484,
+        "mtime": "1776258671.6999295"
+      }
+    }
+  },
+  "nodes_count": 5502,
+  "k_values": [
+    10,
+    20,
+    50
+  ]
+}

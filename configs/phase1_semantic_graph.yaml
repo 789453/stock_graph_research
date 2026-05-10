@@ -1,0 +1,43 @@
+project:
+  phase: "phase1"
+  research_name: "semantic_knn_graph"
+  graph_version: "v1"
+
+semantic:
+  view: "application_scenarios_json"
+  dataset_root: "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset"
+  vectors_path: "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/application_scenarios_json/application_scenarios_json-all.npy"
+  meta_path: "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/application_scenarios_json/application_scenarios_json-all.meta.json"
+  records_path: "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/parquet/records-all.parquet"
+  expected_rows: 5502
+  expected_dim: 1024
+  expected_dtype: "float32"
+  allow_fallback: false
+
+graph:
+  metric: "inner_product"
+  normalized_vectors_expected: true
+  canonical_k: 20
+  sensitivity_k: [10, 20, 50]
+  build_directed: true
+  build_mutual: true
+  remove_self_neighbor: true
+  use_faiss_gpu: true
+  gpu_device: 0
+
+market:
+  requested_start_date: "20100101"
+  requested_end_date: "20260430"
+  stock_daily_path: "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet"
+  stock_daily_basic_path: "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily_basic.parquet"
+  stock_sw_member_path: "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet"
+
+cache:
+  root: "cache"
+  reuse_if_valid: true
+  write_manifest: true
+  force_rebuild: false
+
+plots:
+  output_dir: "outputs/plots"
+  max_ego_examples: 12

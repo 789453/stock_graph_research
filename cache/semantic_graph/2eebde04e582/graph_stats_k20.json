@@ -1,0 +1,19 @@
+{
+  "n_nodes": 5502,
+  "n_directed_edges": 110040,
+  "n_mutual_edges": 64488,
+  "reciprocity_ratio": 0.586041439476554,
+  "max_mutual_component_size": 5401,
+  "max_mutual_component_ratio": 0.9816430388949473,
+  "n_mutual_components": 71,
+  "in_degree_mean": 20.0,
+  "in_degree_std": 13.438457809946257,
+  "out_degree_mean": 20.0,
+  "out_degree_std": 0.0,
+  "score_mean": 0.7452011704444885,
+  "score_min": 0.4679076671600342,
+  "score_max": 1.000000238418579,
+  "top1_score_mean": 0.8340413570404053,
+  "top20_score_mean": 0.702766478061676,
+  "top1_top20_score_gap": 0.13127487897872925
+}
