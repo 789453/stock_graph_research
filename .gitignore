@@ -26,7 +26,6 @@
 !/outputs/**/*.yaml
 !/outputs/**/*.yml
 !/outputs/**/*.json
-!/outputs/**/*.png
 !/outputs/**/*.log
 !/outputs/**/*.csv
 !/outputs/**/*.txt
@@ -37,6 +36,7 @@
 *.parquet
 *.duckdb
 *.db
+*.png
 *.sqlite
 
 # ==================================================
