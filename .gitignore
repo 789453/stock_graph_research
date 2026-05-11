@@ -49,6 +49,7 @@
 # ==================================================
 /scripts/git_push_to_main.sh
 /scripts/git_update_main.sh
+/scripts/git_push_to_branch.sh
 
 __pycache__/
 *.pyc
