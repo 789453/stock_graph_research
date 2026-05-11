@@ -1,123 +1,139 @@
+#!/usr/bin/env python3
+"""
+T2.2.7: 稳健统计检验 (Refactored)
+使用 Permutation Test 和 Bootstrap 验证语义边的超额共振显著性。
+彻底废弃基于独立样本假设的伪 P 值。
+"""
 import os
 import json
 import time
+import argparse
 import numpy as np
 import pandas as pd
-import yaml
 from pathlib import Path
-from typing import Any, List, Dict
+from scipy import stats
 
-def run_statistical_tests(view_name: str, global_config: dict[str, Any]):
+sys_path = str(Path(__file__).parent.parent / "src")
+import sys
+if sys_path not in sys.path:
+    sys.path.insert(0, sys_path)
+
+from semantic_graph_research import load_config
+
+def run_statistical_tests(args):
     start_time = time.time()
-    print(f"Running statistical tests for view: {view_name}")
     
-    # 1. Locate view data
-    view_dir_22 = Path(f"cache/semantic_graph/phase2_2/views/{view_name}")
-    manifest_files = list(view_dir_22.glob("*/manifests/view_market_metrics_manifest.json"))
-    manifest_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-    view_key = manifest_files[0].parent.parent.name
+    config_path = Path(__file__).parent.parent / args.config
+    config = load_config(config_path)
+
+    print("=" * 60)
+    print("T2.2.7: 稳健统计检验 (Refactored)")
+    print(f"Config: {args.config}")
+    print("=" * 60)
+
+    cache_root = Path(config["cache"]["root"]) / "semantic_graph"
+    if args.cache_key:
+        cache_dir = cache_root / args.cache_key
+    else:
+        cache_dirs = [d for d in cache_root.iterdir() if d.is_dir() and d.name != "LATEST"]
+        cache_dir = sorted(cache_dirs)[-1]
+
+    phase2_cache = cache_dir / "phase2"
+    resonance_cache = phase2_cache / "resonance"
+    manifests_dir = phase2_cache / "manifests"
+
+    # 1. 加载数据
+    sem_path = resonance_cache / "edge_resonance_metrics_k20.parquet"
+    rnd_path = resonance_cache / "matched_random_resonance_k20.parquet"
     
-    metrics_dir = view_dir_22 / view_key / "phase2_2/market_behavior"
-    edges = pd.read_parquet(metrics_dir / "edge_market_metrics.parquet")
-    random_bl = pd.read_csv(metrics_dir / "random_baseline_market_metrics.csv")
-    
-    # 2. Define metrics to test
-    target_metric = "corr_resid_full_neutral"
-    
-    results = []
-    
-    # 3. Perform tests per band and baseline type
-    bands = edges["rank_band_exclusive"].unique()
-    
-    for band in bands:
-        if band == "out_of_range": continue
+    if not sem_path.exists() or not rnd_path.exists():
+        print(f"[FAIL] 缺少相关性数据，请先运行 T2.2.6")
+        sys.exit(1)
         
-        band_edges = edges[edges["rank_band_exclusive"] == band]
-        semantic_vals = band_edges[target_metric].dropna().values
-        if len(semantic_vals) == 0: continue
-        
-        semantic_mean = float(np.mean(semantic_vals))
-        
-        # Bootstrap CI for semantic mean
-        rng = np.random.default_rng(20260510)
-        boot_means = [np.mean(rng.choice(semantic_vals, size=len(semantic_vals))) for _ in range(200)]
-        ci_low, ci_high = np.percentile(boot_means, [2.5, 97.5])
-        
-        band_bl = random_bl[random_bl["rank_band"] == band]
-        
-        for _, row in band_bl.iterrows():
-            b_type = row["baseline_type"]
-            random_mean_mean = row["corr_resid_full_neutral_mean_of_repeats"]
-            random_mean_std = row["corr_resid_full_neutral_std_of_repeats"]
-            
-            delta = semantic_mean - random_mean_mean
-            lift = semantic_mean / random_mean_mean if random_mean_mean != 0 else np.nan
-            z_score = delta / random_mean_std if random_mean_std > 0 else np.nan
-            
-            # Cohen's d (simplified: delta / pooled std, but here we use random mean std as proxy or just delta/std)
-            # Actually Cohen's d should use the standard deviation of the individual edges.
-            # But we only have the mean of repeats. 
-            # Let's just use Z-score as a proxy for now or skip d if data is not available.
-            cohens_d = z_score # Not strictly Cohen's d but related
-            
-            # Permutation p-value
-            # We need the individual repeat means to calculate p-value properly
-            # Let's assume we can load them or just use the normal approximation if repeats are enough.
-            # For now, let's mark it as a task to improve if needed.
-            p_val = 1.0 - pd.Series([random_mean_mean + random_mean_std * np.random.randn() for _ in range(1000)]).lt(semantic_mean).mean()
-            # This is a dummy p-value, in a real scenario we'd use the actual distribution of repeats.
-            
-            results.append({
-                "view_name": view_name,
-                "view_key": view_key,
-                "rank_layer": band,
-                "baseline_type": b_type,
-                "metric": target_metric,
-                "semantic_n_edges": len(semantic_vals),
-                "semantic_mean": semantic_mean,
-                "random_mean_mean": random_mean_mean,
-                "delta_mean": delta,
-                "lift": lift,
-                "z_score": z_score,
-                "bootstrap_ci_low": float(ci_low),
-                "bootstrap_ci_high": float(ci_high),
-                "decision": "supported" if delta > 0 and z_score > 2 else "rejected"
-            })
-            
-    df_results = pd.DataFrame(results)
-    out_dir = view_dir_22 / view_key / "phase2_2/stat_tests"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    sem_df = pd.read_parquet(sem_path)
+    rnd_df = pd.read_parquet(rnd_path)
     
-    df_results.to_csv(out_dir / "h5_metric_tests.csv", index=False)
+    x_sem = sem_df["resid_corr"].dropna().values
+    x_rnd = rnd_df["resid_corr"].dropna().values
     
-    # Manifest
-    elapsed = time.time() - start_time
-    manifest = {
-        "phase": "phase2_2",
-        "task_id": "T2.2.7",
-        "task_name": "statistical_tests",
-        "view_name": view_name,
-        "view_key": view_key,
-        "status": "success",
-        "started_at": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(start_time)),
-        "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime()),
-        "elapsed_seconds": elapsed,
-        "outputs": [str(out_dir / "h5_metric_tests.csv")],
-        "safe_to_continue": True
+    print(f"[OK] 加载 {len(x_sem)} 条语义边和 {len(x_rnd)} 条随机边")
+
+    # 2. Permutation Test (置换检验)
+    print("\n[Step 1] 执行 Permutation Test (H0: Semantic == Random)...")
+    observed_diff = np.mean(x_sem) - np.mean(x_rnd)
+    
+    combined = np.concatenate([x_sem, x_rnd])
+    n_sem = len(x_sem)
+    n_rnd = len(x_rnd)
+    
+    n_permutations = 1000
+    perm_diffs = []
+    for _ in range(n_permutations):
+        np.random.shuffle(combined)
+        perm_sem = combined[:n_sem]
+        perm_rnd = combined[n_sem:]
+        perm_diffs.append(np.mean(perm_sem) - np.mean(perm_rnd))
+    
+    perm_diffs = np.array(perm_diffs)
+    p_value = (np.abs(perm_diffs) >= np.abs(observed_diff)).mean()
+    
+    # 3. Bootstrap Confidence Interval (置信区间)
+    print("[Step 2] 执行 Bootstrap 计算置信区间...")
+    n_boot = 1000
+    boot_diffs = []
+    for _ in range(n_boot):
+        b_sem = np.random.choice(x_sem, size=len(x_sem), replace=True)
+        b_rnd = np.random.choice(x_rnd, size=len(x_rnd), replace=True)
+        boot_diffs.append(np.mean(b_sem) - np.mean(b_rnd))
+    
+    ci_low, ci_high = np.percentile(boot_diffs, [2.5, 97.5])
+
+    # 4. 生成结论
+    print("\n[Step 3] 统计结论摘要:")
+    print(f"  Observed Lift: {observed_diff:.6f}")
+    print(f"  95% CI: [{ci_low:.6f}, {ci_high:.6f}]")
+    print(f"  Permutation P-value: {p_value:.4g}")
+    
+    is_significant = p_value < 0.01 and ci_low > 0
+    decision = "SUPPORTED" if is_significant else "REJECTED"
+    print(f"  Decision: {decision}")
+
+    # 5. 保存结果
+    test_results = {
+        "metric": "resid_corr_lift",
+        "observed_lift": float(observed_diff),
+        "ci_95": [float(ci_low), float(ci_high)],
+        "p_value": float(p_value),
+        "n_permutations": n_permutations,
+        "n_bootstrap": n_boot,
+        "status": decision,
+        "created_at": datetime.now().isoformat()
     }
     
-    with open(view_dir_22 / view_key / "manifests/view_stat_tests_manifest.json", "w") as f:
+    with open(resonance_cache / "h5_statistical_tests.json", "w") as f:
+        json.dump(test_results, f, indent=2)
+
+    # 6. Manifest
+    elapsed = time.time() - start_time
+    manifest = {
+        "task_id": "T2.2.7",
+        "task_name": "statistical_tests",
+        "status": "success",
+        "cache_key": cache_dir.name,
+        "summary": test_results
+    }
+    
+    with open(manifests_dir / "t27_manifest.json", "w") as f:
         json.dump(manifest, f, indent=2)
-        
-    return manifest
+
+    print(f"T2.2.7 完成. Elapsed: {elapsed:.1f}s")
 
 def main():
-    config_path = "configs/phase2_1_multi_view_research.yaml"
-    with open(config_path, "r") as f:
-        config = yaml.safe_load(f)
-    
-    for view_name in config["views"].keys():
-        run_statistical_tests(view_name, config)
+    parser = argparse.ArgumentParser(description="T2.2.7: 稳健统计检验")
+    parser.add_argument("--config", default="configs/phase2_semantic_graph_research.yaml", help="配置文件路径")
+    parser.add_argument("--cache-key", help="指定缓存的 cache_key")
+    args = parser.parse_args()
+    run_statistical_tests(args)
 
 if __name__ == "__main__":
     main()

@@ -5,9 +5,10 @@ T6 - 2010—2026.04 行情对齐普查
 """
 import sys
 import json
-import pandas as pd
+import argparse
 from pathlib import Path
 from datetime import datetime
+import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -15,20 +16,33 @@ from semantic_graph_research import load_config
 from semantic_graph_research.cache_io import read_cache_manifest
 
 def main():
-    config_path = Path(__file__).parent.parent / "configs" / "phase1_semantic_graph.yaml"
+    parser = argparse.ArgumentParser(description="T6: 2010—2026.04 行情对齐普查")
+    parser.add_argument("--config", default="configs/phase1_semantic_graph.yaml", help="配置文件路径")
+    parser.add_argument("--cache-key", help="指定缓存的 cache_key")
+    args = parser.parse_args()
+
+    config_path = Path(__file__).parent.parent / args.config
     config = load_config(config_path)
 
     print("=" * 60)
     print("T6: 行情对齐普查")
+    print(f"Config: {args.config}")
     print("=" * 60)
 
     cache_root = Path(config["cache"]["root"]) / "semantic_graph"
-    cache_dirs = [d for d in cache_root.iterdir() if d.is_dir() and d.name != "LATEST"]
-    if not cache_dirs:
-        print("[FAIL] 未找到缓存")
+    if args.cache_key:
+        cache_dir = cache_root / args.cache_key
+    else:
+        cache_dirs = [d for d in cache_root.iterdir() if d.is_dir() and d.name != "LATEST"]
+        if not cache_dirs:
+            print("[FAIL] 未找到缓存")
+            sys.exit(1)
+        cache_dir = sorted(cache_dirs)[-1]
+
+    if not cache_dir.exists():
+        print(f"[FAIL] 缓存目录不存在: {cache_dir}")
         sys.exit(1)
 
-    cache_dir = sorted(cache_dirs)[-1]
     manifest = read_cache_manifest(cache_dir)
     print(f"[OK] 读取语义图缓存: {cache_dir}")
 
@@ -50,7 +64,10 @@ def main():
     if not stock_daily_path.exists():
         print(f"[WARN] stock_daily 不存在: {stock_daily_path}")
         daily_coverage = pd.DataFrame(columns=["ts_code", "daily_row_count", "first_trade_date", "last_trade_date"])
+        actual_max_date = "unknown"
     else:
+        # 使用更高效的方式读取或处理大数据
+        # 这里为了演示仍使用全量读取，实际项目中建议用 duckdb 或 dask
         stock_daily = pd.read_parquet(stock_daily_path)
         print(f"[OK] stock_daily 加载: {len(stock_daily)} rows")
 
@@ -83,31 +100,53 @@ def main():
         print(f"[OK] 节点覆盖: {len(basic_coverage)} / {len(node_stock_codes)}")
 
     print("\n--- 合并覆盖率 ---")
-    coverage = daily_coverage.merge(basic_coverage, on="ts_code", how="left")
+    coverage = pd.DataFrame({"ts_code": list(node_stock_codes)})
+    coverage = coverage.merge(daily_coverage, on="ts_code", how="left")
+    coverage = coverage.merge(basic_coverage, on="ts_code", how="left")
+    
+    coverage["daily_row_count"] = coverage["daily_row_count"].fillna(0)
+    coverage["daily_basic_row_count"] = coverage["daily_basic_row_count"].fillna(0)
     coverage["has_daily"] = coverage["daily_row_count"] > 0
     coverage["has_daily_basic"] = coverage["daily_basic_row_count"] > 0
+    
+    # 增加缺失原因分析
+    def missing_reason(row):
+        if row["daily_row_count"] == 0:
+            return "missing_daily"
+        if row["daily_basic_row_count"] == 0:
+            return "missing_basic"
+        return "ok"
+    
+    coverage["missing_reason"] = coverage.apply(missing_reason, axis=1)
 
-    coverage_with_missing = coverage[~coverage["has_daily"]]
-    if len(coverage_with_missing) > 0:
-        print(f"[WARN] {len(coverage_with_missing)} 只股票缺失 daily 数据")
-        for code in coverage_with_missing["ts_code"].head(5).tolist():
-            print(f"       {code}")
+    missing_stocks = coverage[coverage["missing_reason"] != "ok"]
+    if len(missing_stocks) > 0:
+        print(f"[WARN] {len(missing_stocks)} 只股票存在行情缺失")
+        missing_stocks[["ts_code", "missing_reason"]].to_csv(market_cache_dir / "missing_stock_codes.csv", index=False)
+        print(f"       缺失名单已保存至: {market_cache_dir / 'missing_stock_codes.csv'}")
 
-    total_stocks = len(coverage)
+    total_stocks = len(node_stock_codes)
     stocks_with_daily = coverage["has_daily"].sum()
     stocks_with_basic = coverage["has_daily_basic"].sum()
 
     summary = {
         "requested_start_date": requested_start,
         "requested_end_date": requested_end,
-        "actual_data_max_date": actual_max_date if "actual_max_date" in dir() else "unknown",
-        "total_nodes": len(node_stock_codes),
+        "actual_data_max_date": actual_max_date,
+        "total_nodes": total_stocks,
         "stocks_with_daily": int(stocks_with_daily),
         "stocks_with_daily_basic": int(stocks_with_basic),
         "stocks_with_daily_ratio": float(stocks_with_daily / total_stocks) if total_stocks > 0 else 0,
         "stocks_with_basic_ratio": float(stocks_with_basic / total_stocks) if total_stocks > 0 else 0,
-        "no补造": True,
+        "missing_count": int(len(missing_stocks)),
+        "created_at_utc": pd.Timestamp.utcnow().isoformat(),
+        "script": "05_market_alignment_census.py",
     }
+
+    # 强断言：覆盖率必须达到 95%
+    print("[INFO] 正在执行覆盖率断言...")
+    assert summary["stocks_with_daily_ratio"] >= 0.95, f"Daily 行情覆盖率不足 95%: {summary['stocks_with_daily_ratio']:.2%}"
+    print("[OK] 覆盖率断言通过")
 
     print("\n--- 覆盖率摘要 ---")
     for key, value in summary.items():

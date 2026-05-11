@@ -1,53 +1,56 @@
-#!/usr/bin/env python3
-"""
-T2.1: 构建扩展候选边池
-目标：构建 k=100 候选边池，或统一 k10/k20/k50 为候选边
-生成 adaptive edge layers: core, context, cross_industry_bridge, within_l3_residual
-"""
 import sys
 import json
+import argparse
 from datetime import datetime
 from pathlib import Path
+import pandas as pd
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-def get_config():
-    import yaml
-    project_root = Path(__file__).parent.parent
-    config_path = project_root / "configs" / "phase2_semantic_graph_research.yaml"
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-
-    semantic_config = {
-        "semantic": {
-            "vectors_path": "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/application_scenarios_json/application_scenarios_json-all.npy",
-            "meta_path": "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/npy/application_scenarios_json/application_scenarios_json-all.meta.json",
-            "records_path": "/home/purple_born/QuantSum/stock_graph_research/a_share_semantic_dataset/parquet/records-all.parquet",
-            "expected_rows": 5502,
-            "expected_dim": 1024,
-            "expected_dtype": "float32",
-            "allow_fallback": False,
-        }
-    }
-    config = {**config, **semantic_config}
-    return config
+from semantic_graph_research import load_config, load_semantic_view, build_faiss_knn
+from semantic_graph_research.phase2_graph_layers import (
+    build_edge_candidates_fixed,
+    build_adaptive_core_edges,
+    build_adaptive_context_edges,
+    build_adaptive_cross_industry_bridge_edges,
+    build_adaptive_within_l3_residual_edges,
+)
 
 def main():
-    project_root = Path(__file__).parent.parent
-    config = get_config()
-    cache_dir = project_root / "cache" / "semantic_graph" / "2eebde04e582"
+    parser = argparse.ArgumentParser(description="T2.1: 构建扩展候选边池")
+    parser.add_argument("--config", default="configs/phase2_semantic_graph_research.yaml", help="配置文件路径")
+    parser.add_argument("--cache-key", help="指定缓存的 cache_key")
+    args = parser.parse_args()
+
+    config_path = Path(__file__).parent.parent / args.config
+    config = load_config(config_path)
+
+    print("=" * 60)
+    print("T2.1: 构建扩展候选边池")
+    print(f"Config: {args.config}")
+    print("=" * 60)
+
+    cache_root = Path(config["cache"]["root"]) / "semantic_graph"
+    if args.cache_key:
+        cache_dir = cache_root / args.cache_key
+    else:
+        cache_dirs = [d for d in cache_root.iterdir() if d.is_dir() and d.name != "LATEST"]
+        if not cache_dirs:
+            print("[FAIL] 未找到缓存")
+            sys.exit(1)
+        cache_dir = sorted(cache_dirs)[-1]
+
+    if not cache_dir.exists():
+        print(f"[FAIL] 缓存目录不存在: {cache_dir}")
+        sys.exit(1)
+
     phase2_cache = cache_dir / "phase2" / "edge_layers"
     phase2_cache.mkdir(parents=True, exist_ok=True)
     manifests_dir = cache_dir / "phase2" / "manifests"
     manifests_dir.mkdir(parents=True, exist_ok=True)
 
-    print("=" * 60)
-    print("T2.1: 构建扩展候选边池")
-    print("=" * 60)
-
-    from semantic_graph_research import load_semantic_view, build_faiss_knn
-    import pandas as pd
-    import numpy as np
+    print(f"[OK] 使用缓存目录: {cache_dir}")
 
     print("\n[Step 1] 加载向量和节点表...")
     bundle = load_semantic_view(config)
@@ -67,7 +70,7 @@ def main():
         scores_k100 = data["scores"]
     else:
         print(f"\n[Step 2] 构建 k={k} 邻居矩阵...")
-        gpu_device = config.get("graph", {}).get("gpu_device", 0)
+        gpu_device = config.get("graph", {}).get("gpu_device", -1)
         neighbor_matrix = build_faiss_knn(vectors, k, gpu_device=gpu_device)
         neighbors_k100 = neighbor_matrix.indices
         scores_k100 = neighbor_matrix.scores
@@ -77,17 +80,16 @@ def main():
 
     print(f"[OK] 邻居矩阵: shape={neighbors_k100.shape}")
 
-    from semantic_graph_research.phase2_graph_layers import (
-        build_edge_candidates,
-        build_adaptive_core_edges,
-        build_adaptive_context_edges,
-        build_adaptive_cross_industry_bridge_edges,
-        build_adaptive_within_l3_residual_edges,
-    )
-
     print("\n[Step 3] 构建统一候选边池...")
-    edges = build_edge_candidates(neighbors_k100, scores_k100, nodes, config["graph_candidate"]["rank_bands"])
+    # build_edge_candidates_fixed 已经包含了 rank_band_exclusive 和 cumulative_topk_flags
+    edges = build_edge_candidates_fixed(neighbors_k100, scores_k100, nodes)
     print(f"[OK] 候选边池: {len(edges)} edges")
+
+    # 强断言：rank 1-100 完整性
+    assert edges.groupby("src_node_id").size().eq(100).all(), "每个节点的候选边数必须为 100"
+    assert "rank_band_exclusive" in edges.columns, "缺少 rank_band_exclusive 字段"
+    assert "top_001_010" in edges.columns, "缺少 top_001_010 累计标签"
+    print("[OK] 候选边池验证通过")
 
     edges.to_parquet(phase2_cache / "edge_candidates_k100.parquet", index=False)
     print(f"[OK] 候选边池已保存: edge_candidates_k100.parquet")
@@ -97,14 +99,10 @@ def main():
     print(f"[OK] Score by rank 统计已保存")
 
     print("\n[Step 4] 加载申万行业数据...")
-    sw_member_path = Path(config["semantic"]["records_path"]).parent.parent / "sw_member.parquet"
-    default_sw_path = Path("/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_sw_member.parquet")
+    sw_member_path = Path(config["market"]["stock_sw_member_path"])
     if sw_member_path.exists():
         sw_member = pd.read_parquet(sw_member_path)
         print(f"[OK] 申万数据: {len(sw_member)} records")
-    elif default_sw_path.exists():
-        sw_member = pd.read_parquet(default_sw_path)
-        print(f"[OK] 申万数据(默认路径): {len(sw_member)} records")
     else:
         sw_member = pd.DataFrame(columns=["ts_code", "l1_name", "l3_name"])
         print(f"[WARN] 申万数据不存在，使用空 DataFrame")
@@ -141,9 +139,11 @@ def main():
         "edge_candidates_count": len(edges),
         "edge_candidates_k100_shape": list(neighbors_k100.shape),
         "generated_at": datetime.now().isoformat(),
+        "created_at_utc": pd.Timestamp.utcnow().isoformat(),
+        "script": "07_build_extended_edge_candidates.py",
     }
 
-    for layer_name in ["adaptive_core", "adaptive_context"]:
+    for layer_name in ["adaptive_core", "adaptive_context", "adaptive_cross_industry_bridge", "adaptive_within_l3_residual"]:
         path = phase2_cache / f"{layer_name}_edges.parquet"
         if path.exists():
             df = pd.read_parquet(path)
@@ -157,26 +157,12 @@ def main():
     manifest = {
         "task_id": "T2.1",
         "task_name": "Extended edge candidate pool",
-        "phase1_cache_key": "2eebde04e582",
+        "cache_key": cache_dir.name,
         "started_at": datetime.now().isoformat(),
         "finished_at": datetime.now().isoformat(),
         "status": "success",
-        "inputs": [
-            "cache/semantic_graph/2eebde04e582/nodes.parquet",
-            "cache/semantic_graph/2eebde04e582/neighbors_k100.npz",
-            str(default_sw_path),
-        ],
-        "outputs": [
-            "phase2/edge_layers/edge_candidates_k100.parquet",
-            "phase2/edge_layers/adaptive_core_edges.parquet",
-            "phase2/edge_layers/adaptive_context_edges.parquet",
-            "phase2/edge_layers/adaptive_cross_industry_bridge_edges.parquet",
-            "phase2/edge_layers/adaptive_within_l3_residual_edges.parquet",
-            "phase2/edge_layers/edge_candidates_summary.json",
-        ],
         "parameters": {"k": k},
-        "warnings": [],
-        "error": None,
+        "summary": summary,
     }
 
     with open(manifests_dir / "t21_manifest.json", "w") as f:

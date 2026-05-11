@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-T2.0: Phase 1 修复与测试报告缓存
+LEGACY ONLY.
+Do not use this script for Phase 2.2/2.3 production reports.
+T2.0: Phase 1 修复与测试报告缓存 (Legacy)
 目标：修复 alignment、self-neighbor、mutual 命名、score distribution、PROJECT_STATE 测试状态
 """
 import sys

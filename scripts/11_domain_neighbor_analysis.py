@@ -1,30 +1,50 @@
-#!/usr/bin/env python3
-"""
-T2.5: 域内与跨域邻居分析
-分析同规模/流动性域内和跨域的邻居分数差异
-"""
 import sys
 import json
+import argparse
 from datetime import datetime
 from pathlib import Path
+import pandas as pd
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from semantic_graph_research import load_config
+from semantic_graph_research.cache_io import read_cache_manifest
+
 def main():
-    project_root = Path(__file__).parent.parent
-    cache_dir = project_root / "cache" / "semantic_graph" / "2eebde04e582"
-    phase2_cache = cache_dir / "phase2"
-    baselines_cache = phase2_cache / "baselines"
-    manifests_dir = cache_dir / "phase2" / "manifests"
-    output_dir = project_root / "outputs" / "reports" / "phase2"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    parser = argparse.ArgumentParser(description="T2.5: 域内与跨域邻居分析")
+    parser.add_argument("--config", default="configs/phase2_semantic_graph_research.yaml", help="配置文件路径")
+    parser.add_argument("--cache-key", help="指定缓存的 cache_key")
+    args = parser.parse_args()
+
+    config_path = Path(__file__).parent.parent / args.config
+    config = load_config(config_path)
 
     print("=" * 60)
     print("T2.5: 域内与跨域邻居分析")
+    print(f"Config: {args.config}")
     print("=" * 60)
 
-    import pandas as pd
-    import numpy as np
+    cache_root = Path(config["cache"]["root"]) / "semantic_graph"
+    if args.cache_key:
+        cache_dir = cache_root / args.cache_key
+    else:
+        cache_dirs = [d for d in cache_root.iterdir() if d.is_dir() and d.name != "LATEST"]
+        if not cache_dirs:
+            print("[FAIL] 未找到缓存")
+            sys.exit(1)
+        cache_dir = sorted(cache_dirs)[-1]
+
+    if not cache_dir.exists():
+        print(f"[FAIL] 缓存目录不存在: {cache_dir}")
+        sys.exit(1)
+
+    phase2_cache = cache_dir / "phase2"
+    baselines_cache = phase2_cache / "baselines"
+    baselines_cache.mkdir(parents=True, exist_ok=True)
+    manifests_dir = cache_dir / "phase2" / "manifests"
+    output_dir = Path(config["plots"]["output_dir"]).parent / "reports" / "phase2"
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     edges_path = phase2_cache / "edge_layers" / "edge_candidates_k100.parquet"
     if not edges_path.exists():
@@ -35,157 +55,116 @@ def main():
     print(f"[OK] 加载候选边池: {len(edges)} edges")
 
     nodes = pd.read_parquet(cache_dir / "nodes.parquet")
-    print(f"[OK] 加载节点表: {len(nodes)} nodes")
-
+    
     profile_path = baselines_cache / "node_size_liquidity_profile.parquet"
     if profile_path.exists():
         profile = pd.read_parquet(profile_path)
         print(f"[OK] 加载节点画像: {len(profile)} nodes")
     else:
         print("[WARN] 节点画像不存在，跳过规模/流动性分析")
-        profile = pd.DataFrame(columns=["node_id", "size_quintile", "liquidity_quintile"])
+        profile = pd.DataFrame(columns=["node_id", "size_bucket", "liquidity_bucket"])
 
-    print("\n[Step 1] 合并规模/流动性信息...")
-    edges_with_domain = edges.merge(
-        profile[["node_id", "size_quintile", "liquidity_quintile"]],
+    # 加载行业数据
+    sw_member_path = Path(config["market"]["stock_sw_member_path"])
+    if sw_member_path.exists():
+        sw_member = pd.read_parquet(sw_member_path)
+        nodes = nodes.merge(sw_member[["ts_code", "l1_name", "l2_name", "l3_name"]], left_on="stock_code", right_on="ts_code", how="left")
+
+    print("\n[Step 1] 合并规模/流动性与行业信息...")
+    edges_full = edges.merge(
+        nodes[["node_id", "l1_name", "l2_name", "l3_name"]],
         left_on="src_node_id",
         right_on="node_id",
         how="left",
-        suffixes=("", "_src"),
-    )
-    edges_with_domain = edges_with_domain.merge(
-        profile[["node_id", "size_quintile", "liquidity_quintile"]],
+    ).merge(
+        nodes[["node_id", "l1_name", "l2_name", "l3_name"]],
         left_on="dst_node_id",
         right_on="node_id",
         how="left",
-        suffixes=("", "_dst"),
+        suffixes=("_src", "_dst")
+    )
+    
+    edges_full = edges_full.merge(
+        profile[["node_id", "size_bucket", "liquidity_bucket"]],
+        left_on="src_node_id",
+        right_on="node_id",
+        how="left",
+    ).merge(
+        profile[["node_id", "size_bucket", "liquidity_bucket"]],
+        left_on="dst_node_id",
+        right_on="node_id",
+        how="left",
+        suffixes=("_src", "_dst")
     )
 
-    edges_with_domain["same_size"] = (
-        edges_with_domain["size_quintile"] == edges_with_domain["size_quintile_dst"]
-    ) & edges_with_domain["size_quintile"].notna()
-    edges_with_domain["same_liquidity"] = (
-        edges_with_domain["liquidity_quintile"] == edges_with_domain["liquidity_quintile_dst"]
-    ) & edges_with_domain["liquidity_quintile"].notna()
-    edges_with_domain["same_domain"] = edges_with_domain["same_size"] & edges_with_domain["same_liquidity"]
+    print("\n[Step 2] 标记边类型 (Edge Type Labeling)...")
+    
+    # 定义边类型标签
+    def label_edge_type(row):
+        labels = []
+        # 行业维度
+        if row["l3_name_src"] == row["l3_name_dst"] and pd.notna(row["l3_name_src"]):
+            labels.append("same_l3_peer")
+        elif row["l1_name_src"] == row["l1_name_dst"] and pd.notna(row["l1_name_src"]):
+            labels.append("same_l1_cross_l3")
+        else:
+            labels.append("cross_l1")
+            if row["score"] > 0.8:
+                labels.append("cross_l1_high_score")
+        
+        # 规模与流动性维度
+        if row["size_bucket_src"] == row["size_bucket_dst"] and row["size_bucket_src"] != -1:
+            labels.append("size_similar")
+        else:
+            labels.append("size_different")
+            
+        if row["liquidity_bucket_src"] == row["liquidity_bucket_dst"] and row["liquidity_bucket_src"] != -1:
+            labels.append("liquidity_similar")
+        else:
+            labels.append("liquidity_different")
+            
+        # 特殊标记
+        if row["score"] >= 0.98:
+            labels.append("potential_template_duplicate")
+        
+        if row["is_mutual"]:
+            labels.append("mutual")
+            
+        return "|".join(labels)
 
-    print("\n[Step 2] 按规模域内/跨域统计...")
-    if "size_quintile" in edges_with_domain.columns:
-        size_stats = []
-        for q in [1, 2, 3, 4, 5]:
-            q_edges = edges_with_domain[edges_with_domain["size_quintile"] == q]
-            if len(q_edges) > 0:
-                same_ratio = float(q_edges["same_size"].mean())
-                same_mean_score = float(q_edges[q_edges["same_size"] == True]["score"].mean()) if q_edges["same_size"].sum() > 0 else np.nan
-                cross_mean_score = float(q_edges[q_edges["same_size"] == False]["score"].mean()) if (~q_edges["same_size"]).sum() > 0 else np.nan
-                size_stats.append({
-                    "size_quintile": q,
-                    "total_neighbors": len(q_edges),
-                    "same_size_ratio": round(same_ratio, 4),
-                    "same_size_mean_score": round(same_mean_score, 4) if not np.isnan(same_mean_score) else None,
-                    "cross_size_mean_score": round(cross_mean_score, 4) if not np.isnan(cross_mean_score) else None,
-                })
-        size_df = pd.DataFrame(size_stats)
-        print("\n按规模 quintile 的域内/跨域统计:")
-        print(size_df.to_string(index=False))
+    edges_full["edge_types"] = edges_full.apply(label_edge_type, axis=1)
 
-    print("\n[Step 3] 按流动性域内/跨域统计...")
-    if "liquidity_quintile" in edges_with_domain.columns:
-        liq_stats = []
-        for q in [1, 2, 3, 4, 5]:
-            q_edges = edges_with_domain[edges_with_domain["liquidity_quintile"] == q]
-            if len(q_edges) > 0:
-                same_ratio = float(q_edges["same_liquidity"].mean())
-                same_mean_score = float(q_edges[q_edges["same_liquidity"] == True]["score"].mean()) if q_edges["same_liquidity"].sum() > 0 else np.nan
-                cross_mean_score = float(q_edges[q_edges["same_liquidity"] == False]["score"].mean()) if (~q_edges["same_liquidity"]).sum() > 0 else np.nan
-                liq_stats.append({
-                    "liquidity_quintile": q,
-                    "total_neighbors": len(q_edges),
-                    "same_liquidity_ratio": round(same_ratio, 4),
-                    "same_liquidity_mean_score": round(same_mean_score, 4) if not np.isnan(same_mean_score) else None,
-                    "cross_liquidity_mean_score": round(cross_mean_score, 4) if not np.isnan(cross_mean_score) else None,
-                })
-        liq_df = pd.DataFrame(liq_stats)
-        print("\n按流动性 quintile 的域内/跨域统计:")
-        print(liq_df.to_string(index=False))
+    print("\n[Step 3] 统计边类型分布...")
+    type_stats = edges_full.groupby("edge_types")["score"].agg(["count", "mean", "std"]).sort_values("count", ascending=False)
+    print(type_stats.head(20))
 
-    print("\n[Step 4] 按 rank_band 统计域内比例...")
-    if "rank_band" in edges_with_domain.columns:
-        rank_band_domain_stats = edges_with_domain.groupby("rank_band").agg(
-            total=("score", "count"),
-            same_size_count=("same_size", "sum"),
-            same_liquidity_count=("same_liquidity", "sum"),
-            same_domain_count=("same_domain", "sum"),
-        ).reset_index()
-        rank_band_domain_stats["same_size_ratio"] = (rank_band_domain_stats["same_size_count"] / rank_band_domain_stats["total"]).round(4)
-        rank_band_domain_stats["same_liquidity_ratio"] = (rank_band_domain_stats["same_liquidity_count"] / rank_band_domain_stats["total"]).round(4)
-        rank_band_domain_stats["same_domain_ratio"] = (rank_band_domain_stats["same_domain_count"] / rank_band_domain_stats["total"]).round(4)
-        print("\n按 rank_band 的域内比例:")
-        print(rank_band_domain_stats.to_string(index=False))
-
-    print("\n[Step 5] 规模×流动性交叉分析...")
-    if "size_quintile" in edges_with_domain.columns and "liquidity_quintile" in edges_with_domain.columns:
-        cross_stats = []
-        for sq in [1, 2, 3, 4, 5]:
-            for lq in [1, 2, 3, 4, 5]:
-                cell_edges = edges_with_domain[
-                    (edges_with_domain["size_quintile"] == sq) &
-                    (edges_with_domain["liquidity_quintile"] == lq)
-                ]
-                if len(cell_edges) > 0:
-                    same_domain_ratio = float(cell_edges["same_domain"].mean())
-                    mean_score = float(cell_edges["score"].mean())
-                    cross_stats.append({
-                        "size_q": sq,
-                        "liq_q": lq,
-                        "count": len(cell_edges),
-                        "same_domain_ratio": round(same_domain_ratio, 4),
-                        "mean_score": round(mean_score, 4),
-                    })
-        cross_df = pd.DataFrame(cross_stats)
-        print("\n规模×流动性交叉统计 (前10行):")
-        print(cross_df.head(10).to_string(index=False))
-
-    print("\n[Step 6] 保存结果...")
-    edges_with_domain.to_parquet(baselines_cache / "edges_with_domain.parquet", index=False)
-    print(f"[OK] edges_with_domain.parquet 已保存")
+    print("\n[Step 4] 保存结果...")
+    edges_full.to_parquet(baselines_cache / "edges_with_domain_and_labels.parquet", index=False)
+    print(f"[OK] edges_with_domain_and_labels.parquet 已保存")
 
     summary = {
-        "total_edges": int(len(edges_with_domain)),
-        "size_quintile_stats": size_df.to_dict(orient="records") if "size_quintile" in edges_with_domain.columns else [],
-        "liquidity_quintile_stats": liq_df.to_dict(orient="records") if "liquidity_quintile" in edges_with_domain.columns else [],
-        "rank_band_domain_ratio": rank_band_domain_stats.to_dict(orient="records") if "rank_band" in edges_with_domain.columns else [],
+        "total_edges": int(len(edges_full)),
+        "top_edge_types": type_stats.head(50).to_dict(),
+        "created_at_utc": pd.Timestamp.utcnow().isoformat(),
+        "script": "11_domain_neighbor_analysis.py",
     }
 
     summary_path = baselines_cache / "domain_neighbor_summary.json"
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
-    print(f"[OK] domain_neighbor_summary.json 已保存")
-
-    size_df.to_csv(output_dir / "domain_size_stats.csv", index=False) if "size_quintile" in edges_with_domain.columns else None
-    liq_df.to_csv(output_dir / "domain_liquidity_stats.csv", index=False) if "liquidity_quintile" in edges_with_domain.columns else None
-    print(f"[OK] CSV 报告已保存")
 
     manifest = {
         "task_id": "T2.5",
         "task_name": "Domain neighbor analysis",
-        "phase1_cache_key": "2eebde04e582",
+        "cache_key": cache_dir.name,
         "started_at": datetime.now().isoformat(),
         "finished_at": datetime.now().isoformat(),
         "status": "success",
-        "inputs": [str(edges_path), str(profile_path)],
-        "outputs": [
-            str(baselines_cache / "edges_with_domain.parquet"),
-            str(summary_path),
-        ],
-        "parameters": {},
-        "warnings": [],
-        "error": None,
+        "summary": summary,
     }
 
     with open(manifests_dir / "t25_manifest.json", "w") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
-    print(f"[OK] Manifest 已保存")
 
     print("\n" + "=" * 60)
     print("T2.5 完成")

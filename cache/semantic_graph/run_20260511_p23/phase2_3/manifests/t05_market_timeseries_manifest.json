@@ -1,0 +1,44 @@
+{
+  "phase": "phase2_3",
+  "task_id": "t05",
+  "task_name": "market_timeseries",
+  "status": "success",
+  "created_at": "2026-05-11T12:40:10.402414",
+  "git": {
+    "repo": "789453/stock_graph_research",
+    "branch": "main",
+    "commit_sha": "f2007cf473a1ae610a444157edd5c480aa39f597",
+    "commit_message": "phase2.2 mostly completed but plots not"
+  },
+  "inputs": [
+    {
+      "path": "/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet",
+      "fingerprint": "cd1ca9bd89b6c5e5cedeafe3cbf0ff298ed0737d0b5e3c2f685e16cb38895f72"
+    },
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/data_profiles/node_fundamental_snapshot.parquet",
+      "fingerprint": "f275bbb5340a183dac3d66146357ef3c3d427987dde6f928eff08b02ffd972f4"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/data_profiles/node_market_timeseries_panel.parquet",
+      "fingerprint": "c107beda8223a254640dc9cf59c9cb0cd64f09b389273618e4f623596eac612a"
+    },
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/data_profiles/node_market_annual_panel.parquet",
+      "fingerprint": "9eef60c15e288dfb6da0738dd52351fe96a2c1ba9485a57588bf95d81d4b9992"
+    },
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/data_profiles/node_feature_profile.parquet",
+      "fingerprint": "1dc7a292b66eaea45a433dd3422165ce7ccab994be8b997b4129a0901f60546b"
+    }
+  ],
+  "parameters": {},
+  "validation": {
+    "row_count_ok": true,
+    "null_rate_ok": true,
+    "key_uniqueness_ok": true,
+    "warnings": []
+  }
+}

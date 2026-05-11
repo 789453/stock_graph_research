@@ -1,0 +1,45 @@
+{
+  "phase": "phase2_3",
+  "task_id": "t01",
+  "task_name": "edge_repair",
+  "status": "success",
+  "created_at": "2026-05-11T12:33:25.161560",
+  "git": {
+    "repo": "789453/stock_graph_research",
+    "branch": "main",
+    "commit_sha": "f2007cf473a1ae610a444157edd5c480aa39f597",
+    "commit_message": "phase2.2 mostly completed but plots not"
+  },
+  "inputs": [
+    {
+      "path": "cache/semantic_graph/2eebde04e582/nodes.parquet",
+      "fingerprint": "7a639dd8d97c5fdec93d9c409a710e11ed991757bdec517caa016cd33a0ccd52"
+    },
+    {
+      "path": "cache/semantic_graph/2eebde04e582/phase2/edge_layers/edge_candidates_k100.parquet",
+      "fingerprint": "73a63ec33659ca2af264156cc1de4f89f8c08e223ff1b46ebc96d7273d035653"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/edge_metrics/edge_candidates_k100_repaired.parquet",
+      "fingerprint": "ff00a764f560c5b921feb1ab447e5d84bd4d21c7f76f655161e89b2f535856df"
+    },
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/audits/self_edge_audit.csv",
+      "fingerprint": "14c754c566979dd759f600ed7eb8befd65a22da92053414bbb051e619c19a92e"
+    },
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/audits/near_duplicate_edge_audit.csv",
+      "fingerprint": "cc8f3c5f0646cfe754cc8709009d83f2447c1c18366c001dc27c19f190d658bc"
+    }
+  ],
+  "parameters": {},
+  "validation": {
+    "row_count_ok": true,
+    "self_edge_count": 0,
+    "mutual_ratio": 0.5997091966557615,
+    "rank_range_ok": true,
+    "score_finite_ok": true
+  }
+}

@@ -23,8 +23,12 @@ def build_faiss_knn(vectors: np.ndarray, k: int, gpu_device: int = 0) -> Neighbo
 
     index = faiss.IndexFlatIP(d)
     if gpu_device >= 0:
-        res = faiss.StandardGpuResources()
-        index = faiss.index_cpu_to_gpu(res, gpu_device, index)
+        try:
+            res = faiss.StandardGpuResources()
+            index = faiss.index_cpu_to_gpu(res, gpu_device, index)
+            print(f"[INFO] Using FAISS GPU device {gpu_device}")
+        except Exception as e:
+            print(f"[WARN] FAISS GPU initialization failed: {e}. Falling back to CPU.")
 
     index.add(vectors_copy)
 

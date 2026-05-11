@@ -1,0 +1,22 @@
+{
+  "manifest_checks": [
+    {
+      "task_id": "t00",
+      "status": "success",
+      "outputs_count": 3
+    },
+    {
+      "task_id": "t01",
+      "status": "success",
+      "outputs_count": 3
+    }
+  ],
+  "plot_validation": {
+    "errors": [],
+    "warnings": [
+      "Plot registry not found yet"
+    ],
+    "ok": true
+  },
+  "consistency_ok": true
+}

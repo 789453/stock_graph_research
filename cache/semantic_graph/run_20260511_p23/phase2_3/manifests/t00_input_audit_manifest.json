@@ -1,0 +1,35 @@
+{
+  "phase": "phase2_3",
+  "task_id": "t00",
+  "task_name": "input_audit",
+  "status": "success",
+  "created_at": "2026-05-11T12:32:20.734355",
+  "git": {
+    "repo": "789453/stock_graph_research",
+    "branch": "main",
+    "commit_sha": "f2007cf473a1ae610a444157edd5c480aa39f597",
+    "commit_message": "phase2.2 mostly completed but plots not"
+  },
+  "inputs": [],
+  "outputs": [
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/audits/latest_commit_audit.json",
+      "fingerprint": "7835dd5d240911c48c31026e9745009aa777c67207ff6acb9cecad292940f434"
+    },
+    {
+      "path": "cache/semantic_graph/run_20260511_p23/phase2_3/audits/legacy_output_validity_matrix.csv",
+      "fingerprint": "027b04d4b2a92e7e3b88e9e30a7e76ac2c575f9c110171030e8350cfc48f7ca4"
+    },
+    {
+      "path": "outputs/reports/phase2_3/PHASE2_3_ENGINEERING_AUDIT.md",
+      "fingerprint": "4f175547b4fa57b9b1273667bde9d4c43a48a5da8803bc74a93606ccf7dc3fe4"
+    }
+  ],
+  "parameters": {},
+  "validation": {
+    "row_count_ok": true,
+    "null_rate_ok": true,
+    "key_uniqueness_ok": true,
+    "warnings": []
+  }
+}

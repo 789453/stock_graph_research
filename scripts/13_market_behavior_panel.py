@@ -1,176 +1,167 @@
 #!/usr/bin/env python3
 """
-T2.7: 2018-2026 市场行为面板
-计算每个节点股票在研究窗口内的年度收益、波动率、换手率等市场行为指标
+T2.7: 2018-2026 市场行为月度面板 (Refactored)
+构建月度面板，支持残差矩阵生成和 H5 检验。
+严格遵循 Node Order Safety 和 Phase 2.3 规范。
 """
 import sys
 import json
-from datetime import datetime
+import argparse
+import pandas as pd
+import numpy as np
+import duckdb
 from pathlib import Path
+from datetime import datetime
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from semantic_graph_research import load_config
+from semantic_graph_research.phase2_graph_layers import prepare_nodes_index
+
 def main():
-    project_root = Path(__file__).parent.parent
-    cache_dir = project_root / "cache" / "semantic_graph" / "2eebde04e582"
+    parser = argparse.ArgumentParser(description="T2.7: 2018-2026 市场行为月度面板")
+    parser.add_argument("--config", default="configs/phase2_semantic_graph_research.yaml", help="配置文件路径")
+    parser.add_argument("--cache-key", help="指定缓存的 cache_key")
+    args = parser.parse_args()
+
+    config_path = Path(__file__).parent.parent / args.config
+    config = load_config(config_path)
+
+    print("=" * 60)
+    print("T2.7: 2018-2026 市场行为月度面板 (Refactored)")
+    print(f"Config: {args.config}")
+    print("=" * 60)
+
+    cache_root = Path("cache") / "semantic_graph"
+    if args.cache_key:
+        cache_dir = cache_root / args.cache_key
+    else:
+        # 尝试从 config 中获取
+        cache_dir_str = config.get("paths", {}).get("semantic_graph_cache")
+        if cache_dir_str:
+            cache_dir = Path(cache_dir_str)
+        else:
+            cache_dirs = [d for d in cache_root.iterdir() if d.is_dir() and d.name != "LATEST"]
+            if not cache_dirs:
+                print("[FAIL] 未找到缓存")
+                sys.exit(1)
+            cache_dir = sorted(cache_dirs)[-1]
+
     phase2_cache = cache_dir / "phase2"
     market_behavior_cache = phase2_cache / "market_behavior"
     market_behavior_cache.mkdir(parents=True, exist_ok=True)
-    manifests_dir = cache_dir / "phase2" / "manifests"
-    output_dir = project_root / "outputs" / "reports" / "phase2"
-    output_dir.mkdir(parents=True, exist_ok=True)
+    manifests_dir = phase2_cache / "manifests"
+    manifests_dir.mkdir(parents=True, exist_ok=True)
 
-    print("=" * 60)
-    print("T2.7: 2018-2026 市场行为面板")
-    print("=" * 60)
-
-    import pandas as pd
-    import numpy as np
-
-    nodes = pd.read_parquet(cache_dir / "nodes.parquet")
-    print(f"[OK] 加载节点表: {len(nodes)} nodes")
-
-    stock_codes = nodes["stock_code"].tolist()
-
-    print("\n[Step 1] 加载 stock_daily...")
-    stock_daily_path = Path("/mnt/d/Trading/data_ever_26_3_14/data/silver/stock_daily.parquet")
-    if not stock_daily_path.exists():
-        print("[FAIL] stock_daily 不存在")
+    # 1. 加载节点
+    nodes_path = cache_dir / "nodes.parquet"
+    if not nodes_path.exists():
+        print(f"[FAIL] {nodes_path} 不存在")
         sys.exit(1)
+        
+    nodes = pd.read_parquet(nodes_path)
+    nodes = prepare_nodes_index(nodes, len(nodes))
+    stock_codes = nodes["stock_code"].tolist()
+    print(f"[OK] 加载 {len(nodes)} 节点")
 
-    stock_daily = pd.read_parquet(stock_daily_path)
-    print(f"[OK] stock_daily: {len(stock_daily)} rows")
-    print(f"  日期范围: {stock_daily['trade_date'].min()} - {stock_daily['trade_date'].max()}")
+    # 2. 查询行情数据 (使用 DuckDB 加速)
+    daily_path = config["paths"]["stock_daily_path"]
+    print(f"[Step 1] 从 {daily_path} 加载数据...")
+    
+    # 限制时间范围和股票范围
+    query = f"""
+    SELECT ts_code, trade_date, close, pct_chg, amount
+    FROM read_parquet('{daily_path}')
+    WHERE trade_date BETWEEN '20180101' AND '20261231'
+    AND ts_code IN {tuple(stock_codes)}
+    """
+    daily = duckdb.query(query).df()
+    print(f"[OK] 查询到 {len(daily)} 条记录")
 
-    print("\n[Step 2] 过滤到节点股票...")
-    stock_daily = stock_daily[stock_daily["ts_code"].isin(stock_codes)]
-    print(f"[OK] 过滤后: {len(stock_daily)} rows")
+    # 3. 处理月度指标
+    print("[Step 2] 计算月度指标...")
+    daily["month"] = daily["trade_date"].str[:6]
+    
+    def compute_monthly_stats(group):
+        group = group.sort_values("trade_date")
+        prices = group["close"].values
+        pct_chgs = group["pct_chg"].values
+        
+        # 月度收益: 期末/期初 - 1 (注意：由于是日频数据，简化为期末收盘价相对于期初收盘价的变化，更严谨应包含 pre_close)
+        # 这里为了稳健，直接使用 pct_chg 的累计乘积
+        monthly_return = (1 + pct_chgs / 100.0).prod() - 1
+        
+        # 日对数收益率的波动率
+        log_rets = np.log(1 + pct_chgs / 100.0)
+        volatility = np.std(log_rets) if len(log_rets) > 0 else 0.0
+        
+        # 最大回撤
+        mdd = (1 - prices / np.maximum.accumulate(prices)).max() if len(prices) > 0 else 0.0
+        
+        return pd.Series({
+            "monthly_return": monthly_return,
+            "monthly_amount": group["amount"].sum(),
+            "monthly_volatility": volatility,
+            "max_drawdown": mdd,
+            "trading_days": len(group)
+        })
 
-    print("\n[Step 3] 过滤研究窗口 2018-2026...")
-    stock_daily["trade_date_int"] = stock_daily["trade_date"].astype(int)
-    stock_daily = stock_daily[
-        (stock_daily["trade_date_int"] >= 20180101) &
-        (stock_daily["trade_date_int"] <= 20261231)
-    ]
-    stock_daily = stock_daily.drop(columns=["trade_date_int"])
-    print(f"[OK] 过滤后: {len(stock_daily)} rows")
+    # 计算月度指标
+    monthly_panel = daily.groupby(["ts_code", "month"]).apply(compute_monthly_stats, include_groups=False).reset_index()
+    
+    # 4. 强制对齐 node_id (Node Order Safety)
+    print("[Step 3] 强制对齐 node_id 与月份矩阵...")
+    monthly_panel = monthly_panel.merge(nodes[["node_id", "stock_code"]], left_on="ts_code", right_on="stock_code", how="inner")
+    
+    # 生成月份列表并排序
+    all_months = sorted(monthly_panel["month"].unique())
+    month_to_idx = {m: i for i, m in enumerate(all_months)}
+    monthly_panel["month_idx"] = monthly_panel["month"].map(month_to_idx)
+    
+    print(f"[OK] 面板涵盖 {len(all_months)} 个月份: {all_months[0]} - {all_months[-1]}")
 
-    print("\n[Step 4] 计算年度市场行为指标...")
-    stock_daily = stock_daily.sort_values(["ts_code", "trade_date"])
-    stock_daily["trade_date_int"] = stock_daily["trade_date"].astype(int)
-
-    annual_stats = []
-    for year in range(2018, 2027):
-        year_data = stock_daily[
-            (stock_daily["trade_date_int"] >= year * 10000) &
-            (stock_daily["trade_date_int"] < (year + 1) * 10000)
-        ]
-        if len(year_data) == 0:
-            continue
-
-        for ts_code, group in year_data.groupby("ts_code"):
-            group = group.sort_values("trade_date")
-            prices = group["close"].values
-
-            if len(prices) >= 2:
-                annual_return = (prices[-1] / prices[0]) - 1 if prices[0] > 0 else np.nan
-                log_returns = np.diff(np.log(prices))
-                volatility = float(np.std(log_returns)) if len(log_returns) > 0 else np.nan
-                mean_volume = float(np.mean(group["vol"].values)) if "vol" in group.columns else np.nan
-                mean_amount = float(np.mean(group["amount"].values)) if "amount" in group.columns else np.nan
-                max_drawdown = float(np.min(prices / np.maximum.accumulate(prices) - 1)) if len(prices) > 0 else np.nan
-                trading_days = len(group)
-            else:
-                annual_return = np.nan
-                volatility = np.nan
-                mean_volume = np.nan
-                mean_amount = np.nan
-                max_drawdown = np.nan
-                trading_days = len(group)
-
-            annual_stats.append({
-                "ts_code": ts_code,
-                "year": year,
-                "annual_return": round(annual_return, 4) if not np.isnan(annual_return) else np.nan,
-                "volatility": round(volatility, 4) if not np.isnan(volatility) else np.nan,
-                "mean_volume": round(mean_volume, 2) if not np.isnan(mean_volume) else np.nan,
-                "mean_amount": round(mean_amount, 2) if not np.isnan(mean_amount) else np.nan,
-                "max_drawdown": round(max_drawdown, 4) if not np.isnan(max_drawdown) else np.nan,
-                "trading_days": trading_days,
-            })
-
-    panel_df = pd.DataFrame(annual_stats)
-    print(f"[OK] 年度面板: {len(panel_df)} records, {panel_df['year'].nunique()} years")
-
-    print("\n[Step 5] 计算节点平均市场行为...")
-    node_market_stats = panel_df.groupby("ts_code").agg(
-        avg_annual_return=("annual_return", "mean"),
-        avg_volatility=("volatility", "mean"),
-        avg_mean_amount=("mean_amount", "mean"),
-        total_trading_days=("trading_days", "sum"),
+    # 5. 保存月度面板
+    print("[Step 4] 保存结果...")
+    monthly_panel.to_parquet(market_behavior_cache / "node_monthly_panel_2018_2026.parquet", index=False)
+    
+    # 同时保留一个年度摘要版供 legacy 兼容
+    monthly_panel["year"] = monthly_panel["month"].str[:4]
+    annual_panel = monthly_panel.groupby(["node_id", "stock_code", "year"]).agg(
+        annual_return=("monthly_return", lambda x: (1 + x).prod() - 1),
+        avg_volatility=("monthly_volatility", "mean"),
+        total_amount=("monthly_amount", "sum"),
+        total_trading_days=("trading_days", "sum")
     ).reset_index()
+    annual_panel.to_parquet(market_behavior_cache / "node_annual_panel_2018_2026.parquet", index=False)
 
-    node_panel = nodes.merge(node_market_stats, left_on="stock_code", right_on="ts_code", how="left")
-    node_panel = node_panel.drop(columns=["ts_code"], errors="ignore")
-
-    print(f"[OK] 节点面板: {len(node_panel)} nodes")
-
-    print("\n[Step 6] 市场行为统计...")
-    market_stats = {
-        "avg_annual_return": {
-            "mean": round(float(node_panel["avg_annual_return"].mean()), 4),
-            "median": round(float(node_panel["avg_annual_return"].median()), 4),
-            "std": round(float(node_panel["avg_annual_return"].std()), 4),
-        },
-        "avg_volatility": {
-            "mean": round(float(node_panel["avg_volatility"].mean()), 4),
-            "median": round(float(node_panel["avg_volatility"].median()), 4),
-            "std": round(float(node_panel["avg_volatility"].std()), 4),
-        },
-    }
-    print(json.dumps(market_stats, indent=2))
-
-    print("\n[Step 7] 保存结果...")
-    panel_df.to_parquet(market_behavior_cache / "annual_market_panel_2018_2026.parquet", index=False)
-    print(f"[OK] annual_market_panel_2018_2026.parquet 已保存: {len(panel_df)} records")
-
-    node_panel.to_parquet(market_behavior_cache / "node_market_panel_2018_2026.parquet", index=False)
-    print(f"[OK] node_market_panel_2018_2026.parquet 已保存: {len(node_panel)} nodes")
-
+    # 6. 生成摘要与 Manifest
     summary = {
-        "total_nodes": int(len(nodes)),
-        "nodes_with_market_data": int(node_panel["avg_annual_return"].notna().sum()),
-        "years_covered": list(range(2018, 2027)),
-        "annual_panel_records": int(len(panel_df)),
-        "market_stats": market_stats,
+        "total_nodes": len(nodes),
+        "total_months": len(all_months),
+        "panel_records": len(monthly_panel),
+        "month_range": [all_months[0], all_months[-1]],
+        "avg_trading_days_per_month": float(monthly_panel["trading_days"].mean())
     }
-
-    summary_path = market_behavior_cache / "market_behavior_summary.json"
-    with open(summary_path, "w", encoding="utf-8") as f:
+    
+    with open(market_behavior_cache / "market_behavior_summary.json", "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
-    print(f"[OK] market_behavior_summary.json 已保存")
 
     manifest = {
         "task_id": "T2.7",
-        "task_name": "Market behavior panel 2018-2026",
-        "phase1_cache_key": "2eebde04e582",
+        "task_name": "Monthly market behavior panel",
+        "cache_key": cache_dir.name,
         "started_at": datetime.now().isoformat(),
         "finished_at": datetime.now().isoformat(),
         "status": "success",
-        "inputs": [str(stock_daily_path)],
-        "outputs": [
-            str(market_behavior_cache / "annual_market_panel_2018_2026.parquet"),
-            str(market_behavior_cache / "node_market_panel_2018_2026.parquet"),
-            str(summary_path),
-        ],
-        "parameters": {"window": "2018-2026"},
-        "warnings": [],
-        "error": None,
+        "outputs": {
+            "monthly_panel": str(market_behavior_cache / "node_monthly_panel_2018_2026.parquet"),
+            "annual_panel": str(market_behavior_cache / "node_annual_panel_2018_2026.parquet")
+        },
+        "node_order_policy": "node_id_aligned"
     }
 
     with open(manifests_dir / "t27_manifest.json", "w") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
-    print(f"[OK] Manifest 已保存")
 
     print("\n" + "=" * 60)
     print("T2.7 完成")
